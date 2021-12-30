@@ -1,0 +1,96 @@
+---
+title: "Bullying Network"
+author: "Aurora Maria Tumminello, Lucia Hrovatin"
+output: html_document
+---
+
+# Drawing a network
+
+*Draw the network using the Fruchterman-Reingold layout with names (but without attributes).*
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+*Next draw the network again using the Fruchterman-Reingold layout without names, but now with all 3 attributes (gender, grade and ethnicity) included using in some way a combination of color, shape and size of nodes.*
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+*Create a legend for the attributes (this does not have to be with R, but needs to clarify how the different attributes were represented in the network).*
+
+```{r}
+
+```
+
+
+# Centrality
+
+*Calculate in and out degree centrality for each node and interpret the results:*
+
+-   Who is the most central when it comes to indegree?
+
+    -   Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
+    -   Make sure to discuss the reference points for the indegree measure. How does it compare to the theoretical minimum and maximum value?
+
+```{r}
+
+```
+
+-   Who is the most central when it comes to outdegree?
+
+    -   Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
+    -   Make sure to discuss the reference points for the outdegree measure. How does it compare to the theoretical minimum and maximum value?
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+*Let's assume we hypothesize that the grade of students might be impacted by how many others they are being bullied by. Calculate the correlation between the indegree and the grade of the kid.*
+
+-   What is the correlation value?
+-   What does it mean substantively?
+
+```{r}
+
+```
+
+------------------------------------------------------------------------
+
+*Perform a significance test using a permutation-based approach for the correlation as discussed in class. What does the significance test do and what do you conclude?*
+
+```{r}
+
+```
+
+
+# Centralization and reciprocity
+
+*Calculate the indegree and outdegree centralization for this network using the approach discussed in class and interpret. Make sure to show how you came to these answers.*
+
+-   What do you conclude substantively (taking into account that the network is "who do you bully?")?
+-   Make sure to discuss the reference points for the measure. What is the minimum and maximum value?
+
+```{r}
+
+```
+
+
+------------------------------------------------------------------------
+
+*Calculate the arc-based reciprocity index for this network and interpret. Make sure to show how you came to this answer.*
+
+-   What do you conclude substantively (taking into account that the network is "who do you bully?")?
+-   Make sure to discuss the reference points for the measure. What is the minimum, expected and maximum value?
+
+```{r}
+
+```
+
