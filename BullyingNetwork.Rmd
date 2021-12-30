@@ -3,13 +3,38 @@ title: "Bullying Network"
 author: "Aurora Maria Tumminello, Lucia Hrovatin"
 output: html_document
 ---
+# Importing data
+
+```{r}
+library(tidyverse)
+library(sna)
+
+# Import of network data
+net = as.matrix(read.csv("bullying_network.csv", 
+                         stringsAsFactors=FALSE, row.names=1))
+net = as.network(net, directed=T)
+summary(net)
+
+
+# Import of attributes data
+attr = read.csv("bullying_attributes.csv")
+```
+
 
 # Drawing a network
 
 *Draw the network using the Fruchterman-Reingold layout with names (but without attributes).*
 
 ```{r}
-
+par(mar=c(0,0,0,0)) # Margin deletion
+gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,           # do not allow nodes to be "jittered"
+      edge.col="grey70",  # set color of ties
+      vertex.col="cornflowerblue",   # set color of nodes
+      displaylabels=T,    # indicate that labels should be included
+      label.pos=1,        # indicate that labels should be given below points
+      label.cex=.7)       # indicate the size of the labels (1 is default)
 ```
 
 ------------------------------------------------------------------------
@@ -17,12 +42,111 @@ output: html_document
 *Next draw the network again using the Fruchterman-Reingold layout without names, but now with all 3 attributes (gender, grade and ethnicity) included using in some way a combination of color, shape and size of nodes.*
 
 ```{r}
+# SIZE: Grade
+# SHAPE: Gender
+# COLOR: Ethnicity
+
+colors = c('#fff0f3', '#ffccd5', '#ffb3c1', '#ff8fa3', '#ff758f', 
+           '#ff4d6d', '#c9184a', '#a4133c', '#800f2f', '#590d22',
+           "#d8f3dc","#b7e4c7","#95d5b2","#74c69d","#52b788",
+           "#40916c", "#2d6a4f","#245741","#1b4332","#081c15"
+)
+
+shapes = c(3,4,50)
+
+par(mar=c(0,0,0,0)) # Margin deletion
+gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,           # do not allow nodes to be "jittered"
+      edge.col="grey70",  # set color of ties
+      vertex.col=colors[attr$Gender*10+attr$Grade+1],   # set color of nodes
+      vertex.cex = 2,
+      vertex.rot = 45,
+      vertex.sides= shapes[attr$Ethnicity])
 
 ```
 
 ------------------------------------------------------------------------
 
 *Create a legend for the attributes (this does not have to be with R, but needs to clarify how the different attributes were represented in the network).*
+
+```{r}
+par(mar=c(0,0,0,0)) # Margin deletion
+gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,           # do not allow nodes to be "jittered"
+      edge.col="grey70",  # set color of ties
+      vertex.col=colors[attr$Ethnicity],   # set color of nodes
+      vertex.cex = log(attr$Grade),
+      vertex.sides= (attr$Gender-1)*47+4,
+      displaylabels=T,    # indicate that labels should be included
+      label.pos=1,        # indicate that labels should be given below points
+      label.cex=.7)       # indicate the size of the labels (1 is default)
+legend("topright",
+       legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
+                  " ", "Gender", " Male", " Female",
+                  " ", "Grade", "0", "3", "7", "10"),
+       col = c("white",colors[1],colors[2],colors[3],
+               "white","white","black","black",
+               "white", "white", "black", "black", "black", "black"), 
+       bty = "n", 
+       pch =c(15,15,15,15,15,15,19,18),
+       pt.cex = c(0,2.1,2.1, 2.1,
+                  0,0,2.1,2.1,
+                  0, 0, 1, log(3), log(7), log(10)), 
+       cex = 1, 
+       text.col = "grey10", 
+       horiz = F , 
+       inset = c(0.01))
+
+```
+or
+
+```{r}
+par(mar=c(0,0,0,0)) # Margin deletion
+gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,           # do not allow nodes to be "jittered"
+      edge.col="grey70",  # set color of ties
+      vertex.col=colors[attr$Gender*10+attr$Grade+1],   # set color of nodes
+      vertex.cex = 1.5,
+      vertex.rot = 45,
+      vertex.sides= shapes[attr$Ethnicity],
+      displaylabels=T,    # indicate that labels should be included
+      label.pos=1,        # indicate that labels should be given below points
+      label.cex=.7)       # indicate the size of the labels (1 is default))
+legend("topleft",
+       legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
+                  " ", "Gender", " Male", " Female",
+                  " ", "Grade"),
+       col = c("white","black","black", "black",
+               "white","white","#52b788","#ff4d6d",
+               "white", "white"), 
+       bty = "n", 
+       pch =c(15,17,15,19,
+              15,15,15,15,
+              15, 15),
+       pt.cex = c(0,2.1,2.1, 2.2,
+                  0,0,2.1,2.1,
+                  0,0), 
+       cex = 1, 
+       text.col = "grey10", 
+       horiz = F , 
+       inset = c(0.01))
+
+library(itsadug)
+pal = colorRampPalette(colors[1:10])
+gradientLegend(valRange=c(0,10), 
+               color = pal(10),
+               pos=c(0.05,0.1,.1,0.5), side=4, length = 0.5,
+               inside = T)
+
+pal = colorRampPalette(colors[11:20])
+gradientLegend(valRange=c(0,10), 
+               color = pal(10),
+               pos=c(0.15,0.1,.2,0.5), side=4, length = 0.5,
+               inside = T)
+```
 
 ```{r}
 
