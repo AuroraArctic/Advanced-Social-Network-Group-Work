@@ -3,7 +3,14 @@ title: "Bullying Network"
 author: "Aurora Maria Tumminello, Lucia Hrovatin"
 output: html_document
 ---
+
+
 # Importing data
+
+## Data pre-processing 
+A pre-processing of the original dataset has been necessary. Thus, the original Excel table contained two sheets. Whereas a first attempt involved the function **read_excel(path, sheet = 2)** and implied the network's misreading, a manual split solved the deadlock. Therefore, separate CSV files have been created: 
+<li> *bullying_attributes.csv*: containing the attributes of the network </li><br>
+<li> *bullying_network.csv* : containing the actual matrix (i.e., network) </li><br> 
 
 ```{r}
 library(tidyverse)
@@ -14,9 +21,11 @@ net = as.matrix(read.csv("bullying_network.csv",
                          stringsAsFactors=FALSE, row.names=1))
 net = as.network(net, directed=T)
 summary(net)
+```
 
 
-# Import of attributes data
+```{r}
+# Import of attributes
 attr = read.csv("bullying_attributes.csv")
 ```
 
@@ -100,6 +109,7 @@ legend("topright",
        inset = c(0.01))
 
 ```
+
 or
 
 ```{r}
@@ -148,19 +158,15 @@ gradientLegend(valRange=c(0,10),
                inside = T)
 ```
 
-```{r}
-
-```
-
-
-# Centrality
+## Centrality
 
 *Calculate in and out degree centrality for each node and interpret the results:*
 
 -   Who is the most central when it comes to indegree?
 
-    -   Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
-    -   Make sure to discuss the reference points for the indegree measure. How does it compare to the theoretical minimum and maximum value?
+-   Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
+
+-   Make sure to discuss the reference points for the indegree measure. How does it compare to the theoretical minimum and maximum value?
 
 ```{r}
 
@@ -168,8 +174,9 @@ gradientLegend(valRange=c(0,10),
 
 -   Who is the most central when it comes to outdegree?
 
-    -   Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
-    -   Make sure to discuss the reference points for the outdegree measure. How does it compare to the theoretical minimum and maximum value?
+-   Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
+
+-   Make sure to discuss the reference points for the outdegree measure. How does it compare to the theoretical minimum and maximum value?
 
 ```{r}
 
