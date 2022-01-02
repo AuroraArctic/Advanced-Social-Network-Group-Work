@@ -80,12 +80,14 @@ gplot(net,
 *Create a legend for the attributes (this does not have to be with R, but needs to clarify how the different attributes were represented in the network).*
 
 ```{r}
+color = c("#2a9d8f", "#e9c46a", "#e76f51")
+  
 par(mar=c(0,0,0,0)) # Margin deletion
 gplot(net,
       gmode="digraph",    # directed network
       jitter=F,           # do not allow nodes to be "jittered"
       edge.col="grey70",  # set color of ties
-      vertex.col=colors[attr$Ethnicity],   # set color of nodes
+      vertex.col=color[attr$Ethnicity],   # set color of nodes
       vertex.cex = log(attr$Grade),
       vertex.sides= (attr$Gender-1)*47+4,
       displaylabels=T,    # indicate that labels should be included
@@ -95,7 +97,7 @@ legend("topright",
        legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
                   " ", "Gender", " Male", " Female",
                   " ", "Grade", "0", "3", "7", "10"),
-       col = c("white",colors[1],colors[2],colors[3],
+       col = c("white",color[1],color[2],color[3],
                "white","white","black","black",
                "white", "white", "black", "black", "black", "black"), 
        bty = "n", 
@@ -169,6 +171,24 @@ gradientLegend(valRange=c(0,10),
 -   Make sure to discuss the reference points for the indegree measure. How does it compare to the theoretical minimum and maximum value?
 
 ```{r}
+# From how many people are you bullied? 
+indegree = sna::degree(net, gmode="digraph", cmode = "indegree")
+names = get.vertex.attribute(net, "vertex.names")
+people = data.frame(indegree, names)
+
+
+par(mar=c(0,0,0,0)) # Margin deletion
+gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,
+      edge.col="grey70",  # set color of ties
+      vertex.col=color[attr$Ethnicity],   # set color of nodes
+      vertex.cex = log(indegree),
+      vertex.sides= (attr$Gender-1)*47+4,
+      displaylabels=T,    # indicate that labels should be included
+      label.pos=1,        # indicate that labels should be given below points
+      label.cex=.7)       # indicate the size of the labels (1 is default)
+
 
 ```
 
@@ -179,7 +199,19 @@ gradientLegend(valRange=c(0,10),
 -   Make sure to discuss the reference points for the outdegree measure. How does it compare to the theoretical minimum and maximum value?
 
 ```{r}
-
+# How many people do you bully? 
+outdegree = sna::degree(net, gmode="digraph", cmode = "outdegree")
+par(mar=c(0,0,0,0)) # Margin deletion
+gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,
+      edge.col="grey70",  # set color of ties
+      vertex.col=color[attr$Ethnicity],   # set color of nodes
+      vertex.cex = log(outdegree)+1,
+      vertex.sides= (attr$Gender-1)*47+4,
+      displaylabels=T,    # indicate that labels should be included
+      label.pos=1,        # indicate that labels should be given below points
+      label.cex=.7)       # indicate the size of the labels (1 is default)
 ```
 
 ------------------------------------------------------------------------
