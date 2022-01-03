@@ -10,30 +10,32 @@ output: html_document
 
 ## Data pre-processing 
 A pre-processing of the original dataset has been necessary. Thus, the original Excel table contained two sheets. Whereas a first attempt involved the function **read_excel(path, sheet = 2)** and implied the network's misreading, a manual split solved the deadlock. Therefore, separate CSV files have been created: 
-<li> *bullying_attributes.csv*: containing the attributes of the network </li><br>
+<li> *bullying_attributes.csv*: containing the attributes of the network </li>
 <li> *bullying_network.csv* : containing the actual matrix (i.e., network) </li><br> 
+## Install libraries 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(sna)
 library(itsadug)
 library(knitr)
+```
 
-# Import of network data
+### Import network data
+```{r}
 net = as.matrix(read.csv("bullying_network.csv", 
                          stringsAsFactors=FALSE, row.names=1))
 net = as.network(net, directed=T)
 summary(net)
 ```
 
-
+### Import attributes
 ```{r}
-# Import of attributes
 attr = read.csv("bullying_attributes.csv")
 ```
 
 
-# Drawing a network
+# 1. Drawing a network
 
 *Draw the network using the Fruchterman-Reingold layout with names (but without attributes).*
 
@@ -49,9 +51,38 @@ gplot(net,
       label.cex=.7)       # indicate the size of the labels (1 is default)
 ```
 
+The *Fruchterman-Reingold* layout is the default mode of the **gplot()** function and therefore has not been included. Overall there are 25 labelled nodes connected through directed links. An individual, Roberto, does not present incoming or outgoing edges and, following the definition of Wasserman & Faust (1994), it is defined as an *isolate*^[Wasserman, S., & Faust, K. (1994). Social network analysis: Methods and applications.].
+
 ------------------------------------------------------------------------
 
 *Next draw the network again using the Fruchterman-Reingold layout without names, but now with all 3 attributes (gender, grade and ethnicity) included using in some way a combination of color, shape and size of nodes.*
+
+Considering that the three attributes are respectively:
+
+* **Gender**: binomial variable 0/1 
+* **Ethnicity**: categorical variable assuming three different values 
+* **Grade**: categorical variable assuming 11 different values 
+
+```{r}
+
+# SIZE: Grade
+# SHAPE: Gender
+# COLOR: Ethnicity
+color = c("#2a9d8f", "#e9c46a", "#e76f51")
+  
+par(mar=c(0,0,0,0)) # Margin deletion
+gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,           
+      edge.col="grey70",  # set color of ties
+      vertex.col=color[attr$Ethnicity],   # set color of nodes depending on ethnicity 
+      vertex.cex = log(attr$Grade), # set size of nodes depending on grade
+      vertex.sides= (attr$Gender-1)*47+4) # set shape of nodes depending on gender  
+```
+
+
+
+### NOTARE che qui non abbiamo usato la SIZE!!!
 
 ```{r}
 # SIZE: Grade
@@ -96,7 +127,7 @@ gplot(net,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
       label.cex=.7)       # indicate the size of the labels (1 is default)
-legend("topright",
+legend("topleft",
        legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
                   " ", "Gender", " Male", " Female",
                   " ", "Grade", "0", "3", "7", "10"),
@@ -184,10 +215,7 @@ people$grade = attr$Grade
 
 # Overall Degree 
 degree = sna::degree(net, gmode="digraph")
-people$degree = sort(degree)
-
-people = people[order(indegree),]
-
+people$degree = degree
 
 par(mar=c(0,0,0,0)) # Margin deletion
 sna::gplot(net,
@@ -196,7 +224,7 @@ sna::gplot(net,
       mode = "fruchtermanreingold",
       edge.col="grey70",  # set color of ties
       vertex.col=color[attr$Ethnicity],   # set color of nodes
-      vertex.cex = log(indegree)+0.5,
+      vertex.cex = log(indegree)+0.2,
       vertex.sides= (attr$Gender-1)*47+4,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
@@ -224,7 +252,7 @@ nodes = length(net$val) - 1
 people$norm_indegree = people$indegree / nodes 
 
 avg_indegree = mean(people$indegree)
-median_indegree = median(people$indegree)
+median_indegree = median(sort(people$indegree))
 
 headers = c("Most central", "Max indegree", "Min indegree", "Avg indegree", "Median indegree")
 indegree_measure = c(tail(people$indegree, n=1), nodes, 0, avg_indegree, median_indegree)
@@ -233,7 +261,20 @@ knitr::kable(tab, caption = "Summary table of the indegree reference points")
 
 ```
 
-When the degree-centrality and, specifically, the indegree is considered, Sara is the most central. Whereas in several cases having many incoming edges, this specific network emphasizes an unfavourable condition for the individual. Thus, indegree refers to the number of bullies a node must face. Sara gets bullied by nine other people - normalized $\frac{9}{24} = 0.375$ - and this condition might be affected by her very high grade (i.e., she achieved 10, the highest grade). 
+If the indegree-centrality is considered, Sara is the most central node. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, indegree measure refers to the number of bullies a node must face. Therefore, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375 \%$ of the other nodes (normalization through $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$ with $n$ number of nodes).  Sara's condition in comparison with the worst case scenario, namely a complete centralization with 24 bullies and a single victim, results partially positive. However, if the average indegree is computed (having standard deviation $sd \pm$ `r round(sd(people$indegree),2)`), the value seems extremely high but does not take into consideration the distribution of indegree values. 
+
+```{r}
+barplot(sort(people$indegree), 
+     main="Histogram for Indegree Values",
+     xlab="Nodes",
+     ylab="Indegree",
+     border="#a8dadc", 
+     col="#a8dadc")
+abline(a=avg_indegree, b= 0, col = "red")
+text(1,4, "avg indegree = 3.04", col = 2, adj = c(0, -.1)) 
+```
+
+Thus, the average is strongly impacted by the unbalanced situation within the network, meaning a group of six highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.  
 
 ### Outdegree
 -   Who is the most central when it comes to outdegree?
