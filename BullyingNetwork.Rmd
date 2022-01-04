@@ -34,6 +34,11 @@ library(tidyverse)
 library(sna)
 library(itsadug) # For gradient legend
 library(knitr)
+library(formattable)
+
+customGreen0 = "#DeF7E9"
+customGreen = "#71CA97"
+customRed = "#ff7f7f"
 ```
 
 ## Data import
@@ -292,8 +297,10 @@ gradientLegend(valRange=c(0,10),
 # Centrality
 
 <aside>
-💡 *Calculate in and out-degree centrality for each node and interpret the results:*
+💡 *Calculate in and out-degree centrality for each node and interpret the results.*
+
 </aside>
+
 
 **Degree centrality** is defined as the number of links incident upon a node. Having a directed network implies splitting the degree into in degree and out degree. The former counts the number of incoming edges to a node, while the latter refers to the number of edges a node directs to others [Freeman, L. C. (1978), Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.]. 
 
@@ -302,9 +309,18 @@ When edges express positive aspects (e.g., friendship, collaboration), in degree
 ## In-degree
 
 <aside>
-💡 *Who is the most central when it comes to indegree?
-Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
-Make sure to discuss the reference points for the in-degree measure. How does it compare to the theoretical minimum and maximum value?*
+💡 *Who is the most central when it comes to indegree?*
+
+</aside>
+
+<aside>
+💡 *Provide details of the meaning of the value (taking into account that the network is "who do you bully?").*
+
+</aside>
+
+<aside>
+💡 *Make sure to discuss the reference points for the in-degree measure. How does it compare to the theoretical minimum and maximum value?*
+
 </aside>
 
 Let’s first consider the in-degree centrality of nodes with the function `degree(network, gmode, cmode="indegree")`, which will return the in-degree for each student. The same function can be used to compute the out-degree, setting `cmode="outdegree"`.
@@ -320,12 +336,12 @@ outdegree = sna::degree(net, gmode="digraph", cmode = "outdegree")
 degree = sna::degree(net, gmode="digraph")
 ```
 
-In order to present properly the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (sum of both in and out-degree). 
+In order to properly present the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (i.e. sum of both in and out-degree). 
 
 ```{r}
 # Create dataframe with names, in and out-degree
 names = get.vertex.attribute(net, "vertex.names")
-people = data.frame(names)
+people = data.frame(Name = names)
 people$indegree = indegree
 people$outdegree = outdegree
 people$degree = degree
@@ -335,126 +351,70 @@ nodes = length(net$val) - 1
 people$norm_indegree = round(people$indegree / nodes,2)
 
 people %>%
-  arrange(desc(indegree))
+  arrange(desc(indegree)) %>%
+  formattable(align = c("l",rep("c",4)),
+              'Name' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")),
+              'indegree' = color_tile(customGreen, customGreen0),
+              'outdegree' = color_tile(customGreen, customGreen0),
+              'degree' = color_tile(customGreen, customGreen0),
+              'norm_degree' = color_tile(customGreen, customGreen0))
 ```
 
-
-
-# Centrality
-
-*Calculate in and out degree centrality for each node and interpret the results:*
-
-**Degree centrality** is defined as the number of links incident upon a node. Having a directed network implies splitting the degree into indegree and outdegree. The former counts the number of incoming edges to a node, while the latter refers to the number of edges a node directs to others^[Freeman, L. C. (1978). Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.]. When edges express positive aspects (e.g., friendship, collaboration), indegree can be interpreted as a form of popularity and outdegree as gregariousness. However, a reversed scenario is presented here due to the edges' negative connotation.
-
-### Indegree
--   Who is the most central when it comes to indegree?
-
--   Provide details of the meaning of the value (taking into account that the network is "who do you bully?").
-
--   Make sure to discuss the reference points for the indegree measure. How does it compare to the theoretical minimum and maximum value?
+The average is strongly impacted by the unbalanced situation within the network, meaning a group of six highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. 
 
 ```{r}
-# How many people are you bullied from?
-indegree = sna::degree(net, gmode="digraph", cmode = "indegree")
-
-# How many people do you bully? 
-outdegree = sna::degree(net, gmode="digraph", cmode = "outdegree")
-
-# Overall Degree
-degree = sna::degree(net, gmode="digraph")
-```
-
-In order to present properly the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (sum of both in and out-degree). 
-
-```{r}
-# Create dataframe with names, in and out-degree
-names = get.vertex.attribute(net, "vertex.names")
-people = data.frame(names)
-people$indegree = as.inindegree
-people$outdegree = outdegree
-people$degree = degree
-
-# Normalized indegree
-nodes = length(net$val) - 1
-people$norm_indegree = people$indegree / nodes 
-
 avg_indegree = mean(people$indegree)
+message("Average in degree: ", avg_indegree)
 median_indegree = median(sort(people$indegree))
+message("Median in degree: ", median_indegree)
 
-people %>%
-  arrange(desc(indegree))
+
+results = data.frame(Measures = c("Most central node", 
+                                  "Max in degree",
+                                  "(Theoretical) max in degree", 
+                                  "Min in degree", 
+                                  "(Theoretical) min in degree",
+                                  "Average in degree", 
+                                  "Median in degree"))
+results$Value = c(people[which.max(people$indegree),]$names,
+                  max(people$indegree),
+                  nodes,
+                  min(people$indegree),
+                  0, 
+                  avg_indegree, 
+                  median_indegree)
+
+formattable(results,
+            'Measure' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")))
 ```
 
 ```{r}
 # In-degree distribution among nodes
 ggplot(people)+
-  geom_histogram(aes(x=indegree), stat="count")+
-  geom_density(aes(x=indegree), stat="count")+
+  geom_histogram(aes(x=indegree), stat="count", fill="cornflowerblue")+
   labs(title = "Distribution of in degree")+
-  xlab("In degree centrality")+ylab("Number of students")+
-  
-  
-```
+  xlab("In degree centrality")+ylab("Number of students")
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-headers = c("Most central", "Max indegree", "Min indegree", "Avg indegree", "Median indegree")
-indegree_measure = c(tail(people$indegree, n=1), 
-                     nodes, 0, 
-                     avg_indegree, 
-                     median_indegree)
+person = people[order(people$indegree), ]$names
 
-tab = rbind(headers, indegree_measure, deparse.level = 0 )                   
-knitr::kable(tab, caption = "Summary table of the indegree reference points")
-```
-
-```{r}
-par(mar=c(0,0,0,0)) # Margin deletion
-sna::gplot(net,
-      gmode="digraph",    # directed network
-      jitter=F,
-      mode = "fruchtermanreingold",
-      edge.col="grey70",  # set color of ties
-      vertex.col=color[attr$Ethnicity],   # set color of nodes
-      vertex.cex = log(indegree)+0.2,
-      vertex.sides= (attr$Gender-1)*47+4,
-      displaylabels=T,    # indicate that labels should be included
-      label.pos=1,        # indicate that labels should be given below points
-      label.cex=.7)       # indicate the size of the labels (1 is default)
-
-legend("topright",
-       legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
-                  " ", "Gender", " Male", " Female"),
-       col = c("white",color[1],color[2],color[3],
-               "white","white","black","black"), 
-       bty = "n", 
-       pch =c(15,15,15,15,15,15,19,18),
-       pt.cex = c(0,2.1,2.1, 2.1,
-                  0,0,2.1,2.1), 
-       cex = 1, 
-       text.col = "grey10", 
-       horiz = F , 
-       inset = c(0.01))
-```
-
-
-If the in-degree-centrality is considered, Sara is the most central node. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in-degree measure refers to the number of bullies a node must face. Therefore, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375 \%$ of the other nodes (normalization through $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$ with $n$ number of nodes).  Sara's condition in comparison with the worst case scenario, namely a complete centralization with 24 bullies and a single victim, results partially positive. However, if the average indegree is computed (having standard deviation $sd \pm$ `r round(sd(people$indegree),2)`), the value seems extremely high but does not take into consideration the distribution of indegree values. 
-
-```{r}
-person = people[order(people$indegree), ]$names 
-
-barplot(sort(people$indegree), 
+barplot(sort(people$indegree),
      main="Histogram for Indegree Values",
      names.arg = person,
      ylab="Indegree",
-     border="#a8dadc", 
-     col="#a8dadc", 
+     border="#a8dadc",
+     col="#a8dadc",
      las = 2)
 abline(a=avg_indegree, b= 0, col = "red")
-text(1,4, "avg indegree = 3.04", col = 2, adj = c(0, -.1)) 
+text(1,4, "avg indegree = 3.04", col = 2, adj = c(0, -.1))
 ```
 
-Thus, the average is strongly impacted by the unbalanced situation within the network, meaning a group of six highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.  
+By taking into consideration the in-degree centrality, Sara can be defined as the most central node, followed by Gianna and Marco. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in degree measure refers to the number of bullies a node must face. Consequently, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375\%$ of the other nodes (normalization obtained by $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$, with $n$ number of nodes). 
+
+In the worst case scenario, Sara would be bullied by 24 students and she would be the only victim. However, despite her seeming far from the depicted scenario, her in-degree looks extremely high considering the average and the median in the degree of the entire network. The same happens for students like Gianna, Marco, Andrea, Mario and Valentina. 
+
+It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.
+
 
 ### Outdegree
 -   Who is the most central when it comes to outdegree?
@@ -469,24 +429,33 @@ outdegree = sna::degree(net, gmode="digraph", cmode = "outdegree")
 people$outdegree = outdegree
 max_od = max(outdegree)
 
+# Normalized outdegree
+people$norm_outdegree = people$outdegree / nodes 
+people$norm_outdegree
+
+people %>%
+  arrange(desc(outdegree))
+```
+
+There is no unique central node in the case of the out degree measure. Thus, Angela, Aurora, and Francesco can be detected as the three most central nodes (as shown in the network below). It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below.
+
+
+```{r}
 par(mar=c(0,0,0,0)) # Margin deletion
 gplot(net,
       gmode="digraph",    # directed network
       jitter=F,
       edge.col="grey70",  # set color of ties
       vertex.col= ifelse(outdegree == max_od , "salmon", "lightblue"),
-      vertex.cex = log(outdegree)+0.2,
+      vertex.cex = sizes[outdegree]+1,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
       label.cex=.7)       # indicate the size of the labels (1 is default)
 ```
 
-There is no unique central node in the case of the outdegree measure. Thus, Aurora, Angela, and Francesco can be detected as the three most central nodes. It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below. 
+ 
 
 ```{r}
-# Normalized outdegree
-people$norm_outdegree = people$outdegree / nodes 
-people$norm_outdegree 
 
 avg_outdegree = mean(people$outdegree)
 median_outdegree = median(sort(people$outdegree))
@@ -498,7 +467,7 @@ knitr::kable(tab, caption = "Summary table of the outdegree reference points")
 
 ```
 
-Each of the three central outdegree nodes bullies almost one-third of the overall network: 
+Each of the three central out degree nodes bullies almost one-third of the overall network: 
 \[ \frac{outdegree}{n-1} = \frac{7}{24} = 0.291 \approx 0.29 \approx 1/3\]
 These values are high above the average of `r avg_outdegree` $\pm$ `r round(sd(people$outdegree),2)` but do reach extreme cases, such as a centralized network (i.e., maximum outdegree). Therefore, a visual interpretation of the outdegree distribution in a bar plot graph may help understand the underlying reasons for low reference points.    
 
@@ -542,30 +511,155 @@ text(1,4, paste("Cor:", round(cor_value, 2)), col = 2, adj = c(0, -.1))
 *Perform a significance test using a permutation-based approach for the correlation as discussed in class. What does the significance test do and what do you conclude?*
 
 ```{r}
-
 ```
 
 
 # Centralization and reciprocity
 
-*Calculate the indegree and outdegree centralization for this network using the approach discussed in class and interpret. Make sure to show how you came to these answers.*
+## Centralization
 
--   What do you conclude substantively (taking into account that the network is "who do you bully?")?
--   Make sure to discuss the reference points for the measure. What is the minimum and maximum value?
+<aside>
+💡 *Calculate the in-degree and out-degree centralization for this network using the approach discussed in class and interpret. Make sure to show how you came to these answers.*
+
+    
+💡 *What do you conclude substantively (taking into account that the network is "who do you bully?")?*
+
+💡 *Make sure to discuss the reference points for the measure. What is the minimum and maximum value?*
+
+</aside>
+
+Centralization is a question about how central some nodes are compared to other nodes, it is a characteristic of the network itself. It's related to the distribution of the centrality inside the network, while centrality is more related to the individual sphere of the nodes. 
+
+In an undirected network, centralization is computed as follows:
+
+$$
+Centralisation = \frac{\sum (\max-degree_i)}{(n-1)(n-2)}
+$$
+The most centralized network is the one that has a single node in the center, which that links every other node in the network. In this case the maximum degree is $(n-1)$, therefore the centralization index is:
+
+$$
+C = \frac{(24-1)*24+(24-24)*1}{24*23} = \frac{23*24}{23*24} = 1
+$$
+while in the opposite case, in a decentralized network where every node is linked to everybody else, the centralization index is:
+
+$$
+C = \frac{(24-24)*25}{24*23} = \frac{0}{23*24} = 0
+$$
 
 ```{r}
-
+# Total degree centralisation
+sna::centralization(net,sna::degree)
 ```
+In the studied network, the centralization index is $0.111413$, which indicates a fairly decentralized network. 
 
-
-------------------------------------------------------------------------
-
-*Calculate the arc-based reciprocity index for this network and interpret. Make sure to show how you came to this answer.*
-
--   What do you conclude substantively (taking into account that the network is "who do you bully?")?
--   Make sure to discuss the reference points for the measure. What is the minimum, expected and maximum value?
+Since the bullying network is directed, it is possible to distinguish the centralization index into in degree and out degree. As the table shows, the in degree is higher than the out degree centralization index, indicating a more centralized bullied network (i.e. a few of them are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others). Notice that both these indexes are higher than the previous centralization index, indicating two more centralized networks if separated than if joined in an undirected one. 
 
 ```{r}
-
+      # In degree centralisation
+formattable(data.frame(cbind("In degree Centralisation Index" = sna::centralization(net,sna::degree, cmode="indegree"),
+      # Out degree centralisation
+      "Out degree Centralisation Index" = sna::centralization(net,sna::degree, cmode="outdegree"))))
 ```
 
+Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in terms of centralization index, the computed ones are closer to the minimal reference point than the maximal, leading to the conclusion of a decentralized network. 
+
+The following table resumes closeness, betweenness and Bonacich Power centrality per each student:
+
+```{r}
+## Betweenness centrality
+betweenness = sna::betweenness(net, gmode="digraph")/(25*24/2)
+## Bonacich Power Centrality
+bonpow = sna::bonpow(net, gmode="digraph", exponent=0)
+
+## Constraint index
+library(igraph)
+i_net<-graph_from_adjacency_matrix(as.matrix(read.csv("bullying_network.csv",
+                                                      row.names = 1, 
+                                                      stringsAsFactors = F)),
+                                   mode="directed", diag=F)
+
+con_ind = constraint(i_net)
+```
+
+```{r echo=FALSE}
+as.datatable(formattable(data.frame(cbind(betweenness,
+                             bonpow,
+                             con_ind)),
+            'betweenness' = color_bar("lightpink"),
+            align = c("l",rep("c",3))))
+```
+
+## Reciprocity
+
+<aside>
+💡 *Calculate the arc-based reciprocity index for this network and interpret. Make sure to show how you came to this answer.*
+
+</aside>
+
+<aside>
+💡 *What do you conclude substantively (taking into account that the network is "who do you bully?")?*
+
+</aside>
+
+<aside>
+💡 *Make sure to discuss the reference points for the measure. What is the minimum, expected and maximum value?*
+
+</aside>
+
+```{r}
+sna::dyad.census(net)
+```
+
+Let’s start with a census about dyads, which will return how many mutual, asymmetric and null dyads there are in the network. Given $25$ nodes, the maximal number of edges is $(25*24)/2 = 300$, while the minimal is $0$. According to the census, there are:
+
+* 4 mutual edges: Francesco - Andrea, Flavio - Giulia, Angelo - Giulia and Marco - Sara. By looking at their degree centrality, we can notice that:
+    - Flavio and Marco bully just one person per each (i.e. Giulia and Sara) respectively, but their victim, in turn, bully them, creating a cycle of attack and defence;
+    - Giulia appears twice in these mutual edges, which are half her in and out-edges. This could imply her capacity to respond to her bullies by bullying in return.
+    
+```{r}
+# Mutual edges
+E(i_net)[which_mutual(i_net)]
+
+# Degree Centrality of nodes with mutual links
+people %>%
+  filter(Name %in% c("Francesco", "Andrea", 
+                     "Flavio", "Marco", 
+                     "Giulia", "Sara", "Angelo"))
+```
+    
+* 68 asymmetrical edges;
+* 228 null or missing edges.
+
+Next, the reciprocity index is computed as the number of mutual dyads in the network over the total amount of possible mutual dyads:
+
+$$
+Reciprocity = \frac{2*M}{2*M+A}
+$$
+
+```{r}
+sna::grecip(net, measure="edgewise"s)
+```
+
+If there wasn’t any mutual edge, reciprocity would have been 0:
+
+$$
+Reciprocity_{min} = \frac{2*M}{2*M+A} = \frac{2*0}{2*0+A}=0
+$$
+
+If instead all edges were mutual, the highest reachable value would have been 1:
+
+$$
+Reciprocity_{max} = \frac{2*M}{2*M+A} = \frac{2*M}{2*M}=1
+$$
+
+With respect to the edgewise or tie or arc-based reciprocity, i.e. the proportion of edges that are reciprocated, we get a reciprocity index of $0.1052632$ and thus indicating the lack of mutual edges, albeit not their absence.
+
+Considering instead the dyadic measure for reciprocity, we obtain the proportion of mutual and null edges over the total (i.e. mutual, asymmetrical and null), getting a $0.733$ reciprocity score. 
+```{r}
+sna::grecip(net, measure="dyadic")
+```
+
+By removing null edges, the index falls to $0.05555556$, indicating that over the 5% of edges is mutual and therefore that over 5% of students bully each other mutually. 
+```{r}
+sna::grecip(net, measure="dyadic.nonnull")
+```
