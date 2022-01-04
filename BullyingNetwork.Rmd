@@ -25,7 +25,7 @@ The first sheet, the attributes one, contains:
 
 ## Data pre-processing
 
-As forehead described, the original excel file contains two sheets. The first approach consisted in using the `read_excel(path, sheet)` function, by saving the first and the second sheet separately in different variables.  Since this attempt implied a network misreading of 0s and 1s as characters instead of double and creating an undirected network, we opted for a more correct importing action: the original excel file has been manually split into two separate csv files:
+As forehead described, the original Excel file contains two sheets. To retrieve the information there stored, a first approach exploited the `read_excel(path, sheet)` function and saved the two sheets in different variables. Since this attempt implied a network misreading of 0s and 1s as characters instead of double and creating an undirected graph, we opted for another importing action: the original Excel file has been manually split into two separate csv files:
 
 - `bullying_attributes.csv`: containing the attributes of students inside the network;
 - `bullying_network.csv`: containing the actual adjacency matrix (i.e. the network).
@@ -57,16 +57,16 @@ summary(net, print.adj = FALSE)
 
 By inspecting the obtained network through `summary(net)`, we may notice:
 
-- the number of vertices (i.e. nodes), which are 25 students;
+- the number of vertices (i.e., nodes), which are 25 students;
 - that the network is directed;
 - that no hyperedges, loops or multiple edges are allowed;
-- that there are 76 edges;
-- that the density is 0.1266667, which will be our focus in the centralisation section;
-- that nodes have names, which correspond to students’ first names.
+- that there are overall 76 directed edges;
+- that the density is 0.1266667, which will be the focus of the centralisation section;
+- that nodes are labeled with names, namely the students’ first names.
 
 ### Import attributes
 
-Students attributes are saved in an additional file and therefore imported separately. 
+Students attributes have been saved in a distinct file and, therefore, imported separately. 
 
 ```{r}
 # Reading the csv file with node attributes
