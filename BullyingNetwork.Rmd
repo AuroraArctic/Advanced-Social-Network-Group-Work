@@ -349,22 +349,56 @@ Once again, the outdegree measure shows an imbalanced situation assessing a sign
 -   What does it mean substantively?
 
 ```{r}
+
 grade = attr$Grade
-cor_value = cor(grade, indegree, method = c("pearson"))
+cor_value = cor(indegree, grade, method = c("pearson"))
+cor_value
 summary(cor_value)
 
 # Creating the plot
-plot(grade, indegree, pch = 19, col = "#001219")
-abline(lm(indegree ~ grade), col = "#ae2012", lwd = 3)
-text(1,4, paste("Cor:", round(cor_value, 2)), col = 2, adj = c(0, -.1)) 
+plot(indegree, grade, 
+     pch = 19,col = "#001219", 
+     xlab="Indegree", ylab = "Grade", 
+     main = "Correlation between indegree and grade", 
+     xlim = c(0, max(indegree)+0.5), 
+     ylim = c(0,10), xaxt="n")
+axis(1, at = seq(0, 9, by = 1), las=2)
+abline(lm(grade ~ indegree ), col = "#ae2012", lwd = 3)
+
+text(1,4, expression(paste(rho, ": 0.85")), col = "#ae2012", adj = c(0, -.1)) 
+
+cor.test(indegree,grade)
 
 ```
+
+The Pearson coefficient, namely the correlation coefficient, is slightly above 0.85. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., indegree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
+- statistically significant due to low p-value 
 
 ------------------------------------------------------------------------
 
 *Perform a significance test using a permutation-based approach for the correlation as discussed in class. What does the significance test do and what do you conclude?*
 
 ```{r}
+
+set.seed(21)
+
+permutation = matrix(NA,1000,1)
+for (k in c(1:1000))
+{
+  grade_perm = sample(grade)
+  permutation[k,1] = cor(indegree, grade_perm)
+}
+
+hist(permutation, prob=TRUE, 
+     xlim=c(-1.0,1.0), ylim = c(0.0, 2.0), 
+     xlab = "Value of permutation", col = "#f2cc8f")
+
+x <- seq(min(permutation), max(permutation))
+curve(dnorm(x, mean=mean(permutation), sd=sd(permutation)), 
+      col="#3d405b", lwd=2, add=TRUE)
+text(x = 0.56, y = cor(indegree, grade), expression(paste("N~(", mu, "= 0.0, ", omega, "= 0.2)")), col = "#3d405b")
+abline(v=cor(indegree, grade), lwd=2, col="#ae2012")
+text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade), expression(paste(rho, ": 0.85")), col = "#ae2012")
 
 ```
 
