@@ -309,6 +309,7 @@ When edges express positive aspects (e.g., friendship, collaboration), in degree
 
 <aside>
 💡 *Make sure to discuss the reference points for the in-degree measure. How does it compare to the theoretical minimum and maximum value?*
+
 </aside>
 
 Let’s first consider the in-degree centrality of nodes with the function `degree(network, gmode, cmode="indegree")`, which will return the in-degree for each student. The same function can be used to compute the out-degree, setting `cmode="outdegree"`.
@@ -445,6 +446,7 @@ legend("topright",
 
 <aside>
 💡 *Make sure to discuss the reference points for the outdegree measure. How does it compare to the theoretical minimum and maximum value?*
+
 </aside>
 
 There is no unique central node in the case of the out degree measure. Thus, Angela, Aurora, and Francesco can be detected as the three most central nodes (as shown in the network below). It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below.
@@ -543,37 +545,71 @@ Once again, the outdegree measure shows an imbalanced situation assessing a sign
 -   *What does it mean substantively?*
 </aside>
 
+### Grade and in-degree
+
 ```{r}
 grade = attr$Grade
 cor_value = cor(indegree, grade, method = c("pearson"))
 cor_value
-summary(cor_value)
 ```
-
+The Pearson coefficient on in-degree and grade, namely the correlation coefficient, is slightly above 0.85. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., in-degree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
 
 ```{r}
-# Creating the plot
-plot(indegree, grade, 
-     pch = 19,col = "#001219", 
-     xlab="Indegree", ylab = "Grade", 
-     main = "Correlation between indegree and grade", 
-     xlim = c(0, max(indegree)+0.5), 
-     ylim = c(0,10), xaxt="n")
-axis(1, at = seq(0, 9, by = 1), las=2)
-abline(lm(grade ~ indegree ), col = "#ae2012", lwd = 3)
-
-text(1,4, expression(paste(rho, ": 0.85")), col = "#ae2012", adj = c(0, -.1)) 
-
 cor.test(indegree,grade)
-
 ```
 
-The Pearson coefficient, namely the correlation coefficient, is slightly above 0.85. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., indegree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
-- statistically significant due to low p-value 
+Moreover, the correlation test shows a low p-values, indicating a statistically significant relationship between the number of people that bullies a kid and the grade he/she gets. 
 
-------------------------------------------------------------------------
+```{r message=FALSE, warning=FALSE}
+# Linear relationship between in degree and grade
+ggplot(people,aes(x = indegree, y = grade))+
+    stat_smooth(method = "lm", color = "#1FAD9D", fill = "#A8F0E9")+
+    geom_point(size = 2.5, color = "#1FAD9D")+
+    theme_minimal()+
+    theme(axis.text.x = element_text(angle =45, hjust=1))+
+    labs(title = "Linear relationship between in degree and grade")
+```
+### Gender
 
-*Perform a significance test using a permutation-based approach for the correlation as discussed in class. What does the significance test do and what do you conclude?*
+```{r}
+########################
+# Significance test also on ethnicity and gender
+########################
+attr$indegree = indegree
+attr$outdegree = outdegree
+
+# GENDER SIGNIFICANCE TEST
+# Mean difference between males and females (in degree)
+t.test(filter(attr,Gender==0)$indegree,
+       filter(attr,Gender==1)$indegree)
+
+# Mean difference between males and females (out degree)
+t.test(filter(attr,Gender==0)$outdegree,
+       filter(attr,Gender==1)$outdegree)
+
+# Mean difference between males and females (in degree)
+var.test(filter(attr,Gender==0)$indegree,
+       filter(attr,Gender==1)$indegree)
+
+# Mean difference between males and females (out degree)
+var.test(filter(attr,Gender==0)$outdegree,
+       filter(attr,Gender==1)$outdegree)
+```
+
+### Ethnicity
+
+
+
+### Permutation-based approach
+
+<aside>
+💡 *Perform a significance test using a permutation-based approach for the correlation as discussed in class. What does the significance test do and what do you conclude?*
+
+</aside>
+
+A permutation-based test (also called re-randomization test) is a type of statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points.
+
+In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the $\rho$-value indicates that, after 1,000 permutations, the correlation is more statistically significant than by chance. 
 
 ```{r}
 set.seed(21)
@@ -585,16 +621,23 @@ for (k in c(1:1000))
   permutation[k,1] = cor(indegree, grade_perm)
 }
 
+# Histogram
 hist(permutation, prob=TRUE, 
      xlim=c(-1.0,1.0), ylim = c(0.0, 2.0), 
-     xlab = "Value of permutation", col = "#f2cc8f")
+     xlab = "Value of permutation", col = "#C7A8C5")
 
 x <- seq(min(permutation), max(permutation))
+
+# Gaussian curve
 curve(dnorm(x, mean=mean(permutation), sd=sd(permutation)), 
-      col="#3d405b", lwd=2, add=TRUE)
-text(x = 0.56, y = cor(indegree, grade), expression(paste("N~(", mu, "= 0.0, ", omega, "= 0.2)")), col = "#3d405b")
-abline(v=cor(indegree, grade), lwd=2, col="#ae2012")
-text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade), expression(paste(rho, ": 0.85")), col = "#ae2012")
+      col="#7C5079", lwd=2, add=TRUE)
+text(x = 0.56, y = cor(indegree, grade), 
+     expression(paste("N~(", mu, "= 0.0, ", omega, "= 0.2)")), col = "#3E283D")
+
+# P-value line
+abline(v=cor(indegree, grade), lwd=2, col="#7C5079")
+text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade),
+     expression(paste(rho, ": 0.85")), col = "#7C5079")
 ```
 
 
