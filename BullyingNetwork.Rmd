@@ -1,8 +1,11 @@
 ---
 title: "Bullying Network"
 author: "Aurora Maria Tumminello, Lucia Hrovatin"
-output: 
-  html_notebook: 
+output:
+  html_document:
+    toc: yes
+    df_print: paged
+  html_notebook:
     toc: yes
     highlight: monochrome
     theme: journal
@@ -22,14 +25,14 @@ The first sheet, the attributes one, contains:
 
 ## Data pre-processing
 
-As forehead described, the original excel file contains two sheets. The first approach consisted in using the `read_excel(path, sheet)` function, by saving the first and the second sheet separately in different variables.  Since this attempt implied a network misreading of 0s and 1s as characters instead of double and creating an undirected network, we opted for a more correct importing action: the original excel file has been manually split into two separate csv files:
+As forehead described, the original Excel file contains two sheets. To retrieve the information there stored, a first approach exploited the `read_excel(path, sheet)` function and saved the two sheets in different variables. Since this attempt implied a network misreading of 0s and 1s as characters instead of double and creating an undirected graph, we opted for another importing action: the original Excel file has been manually split into two separate csv files:
 
 - `bullying_attributes.csv`: containing the attributes of students inside the network;
 - `bullying_network.csv`: containing the actual adjacency matrix (i.e. the network).
 
 ## Libraries
 
-```{r}
+```{r message=FALSE}
 library(tidyverse)
 library(sna)
 library(itsadug) # For gradient legend
@@ -59,16 +62,16 @@ summary(net, print.adj = FALSE)
 
 By inspecting the obtained network through `summary(net)`, we may notice:
 
-- the number of vertices (i.e. nodes), which are 25 students;
+- the number of vertices (i.e., nodes), which are 25 students;
 - that the network is directed;
 - that no hyperedges, loops or multiple edges are allowed;
-- that there are 76 edges;
-- that the density is 0.1266667, which will be our focus in the centralisation section;
-- that nodes have names, which correspond to students’ first names.
+- that there are overall 76 directed edges;
+- that the density is 0.1266667, which will be the focus of the centralisation section;
+- that nodes are labeled with names, namely the students’ first names.
 
 ### Import attributes
 
-Students attributes are saved in an additional file and therefore imported separately. 
+Students attributes have been saved in a distinct file and, therefore, imported separately. 
 
 ```{r}
 # Reading the csv file with node attributes
@@ -100,7 +103,7 @@ gplot(net,
 			object.scale = 0.01)
 ```
 
-The *Fruchterman-Reingold* layout is the default mode of the `gplot()` function and therefore it is not necessary to include it. Overall there are 25 labelled nodes connected through directed links which represent who bullies whom. In particular, there is a student, Roberto, that does not present incoming or outgoing edges and, following the definition of Wasserman & Faust (1994), it is defined as an isolate [Wasserman, S., & Faust, K. (1994). Social network analysis: Methods and applications]. Therefore, Roberto is the only student in this specific school class that is not bullied and does not bully either.  
+The *Fruchterman-Reingold* layout is the default mode of the `gplot()` function and therefore it is not necessary to include it. Overall there are 25 labelled nodes connected through directed links which represent who bullies whom. In particular, there is a student, Roberto, that does not present incoming or outgoing edges and, following the definition of Wasserman & Faust (1994), it is defined as an isolate^[Wasserman, S., & Faust, K. (1994). Social network analysis: Methods and applications]. Therefore, Roberto is the only student in this specific school class that is not bullied and does not bully either.  
 
 
 ## Attribute-based network
@@ -118,7 +121,7 @@ The *Fruchterman-Reingold* layout is the default mode of the `gplot()` function 
 Once again, let’s consider the three attributes and their respective values:
 
 - **Gender**: binomial variable 0/1;
-- **Ethnicity**: categorical variable assuming three different values (1,2 or 3);
+- **Ethnicity**: categorical variable assuming three different values (1, 2 or 3);
 - **Grade**: categorical variable assuming 11 different values (from 0 to 10).
 
 These attributes could be mapped in many different ways considering the shape, the colour and the size of nodes. 
@@ -127,15 +130,11 @@ These attributes could be mapped in many different ways considering the shape, t
 
 A first version considers:
 
-- size: grade;
-- shape: gender;
-- colour: ethnicity.
+- **size**: grade;
+- **shape**: gender;
+- **colour**: ethnicity.
 
 ```{r}
-# SIZE: Grade
-# SHAPE: Gender
-# COLOR: Ethnicity
-
 colours_1 = c("#2a9d8f", "#e9c46a", "#e76f51")
 sizes = seq(0.1, 4, length.out=11)
 
@@ -150,6 +149,7 @@ gplot(net,
 			vertex.rot = 45, # Nodes rotation
       arrowhead.cex = 0.5) # Size of the arrows head
 ```
+
 In this representation, both gender and ethnicity are evident, while the grade is not accurately represented by the size. In this last case, the logarithm has been applied to the grade attribute in order to represent nodes properly and scale them, but still without being able to distinguish the difference in terms of grades.
 
 In the following chunk, a legend is added to guide the user in the reading of the network:
@@ -168,12 +168,13 @@ gplot(net,
       edge.col="grey70",  # set color of ties
       vertex.col=colours_1[attr$Ethnicity],   # set color of nodes depending on ethnicity 
       vertex.cex = sizes[attr$Grade], # set size of nodes depending on grade
-      vertex.sides= sides[attr$Gender+1], # set shape of nodes depending on gender  
+      vertex.sides= (attr$Gender-1)*47+4, # set shape of nodes depending on gender  
       vertex.rot = 45,
       arrowhead.cex = 0.5,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
       label.cex=.7)       # indicate the size of the labels (1 is default)
+
 legend("topleft",
        legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
                   " ", "Gender", " Male", " Female",
@@ -203,10 +204,6 @@ A second approach is to represent attributes as such:
 - colour lightness: grade (the darker the higher, the lighter the lower).
 
 ```{r}
-# SIZE: Grade
-# SHAPE: Gender
-# COLOR: Ethnicity
-
 colours_2 = c('#fff0f3', '#ffccd5', '#ffb3c1', '#ff8fa3', '#ff758f', 
            '#ff4d6d', '#c9184a', '#a4133c', '#800f2f', '#590d22',
            "#d8f3dc","#b7e4c7","#95d5b2","#74c69d","#52b788",
@@ -220,12 +217,13 @@ gplot(net,
       gmode="digraph",    # directed network
       jitter=F,           # do not allow nodes to be "jittered"
       edge.col="grey70",  # set color of ties
-      vertex.col=colors[attr$Gender*10+attr$Grade+1],   # set color of nodes
+      vertex.col=colours_2[attr$Gender*10+attr$Grade+1],   # set color of nodes
       vertex.cex = 1.3,
       vertex.rot = 45,
       vertex.sides= shapes[attr$Ethnicity],
       arrowhead.cex = 0.5)
 ```
+
 Despite ethnicity is not so evident as before, in this case, gender is discernible through the hue of nodes and grade through the use of lightness in the choice of colours. In fact, darker colours indicate higher grades and the difference is perceptible with respect to the previous case where size was used. 
 
 Notice that the application of size variation with respect to gender or ethnicity may unconsciously suggest a social superiority of one of the categories, which does not exist. Moreover, colours and shapes are sufficient to represent categorical variables with less than 3 values.
@@ -244,7 +242,7 @@ gplot(net,
       gmode="digraph",    # directed network
       jitter=T,           # do not allow nodes to be "jittered"
       edge.col="grey70",  # set color of ties
-      vertex.col=colors[attr$Gender*10+attr$Grade+1],   # set color of nodes
+      vertex.col=colours_2[attr$Gender*10+attr$Grade+1],   # set color of nodes
       vertex.cex = 1,
       vertex.rot = 45,
       vertex.sides= shapes[attr$Ethnicity],
@@ -274,7 +272,7 @@ legend("topleft",
        inset = c(0.01))
 
 # Gradient legend
-pal = colorRampPalette(colors[1:10])
+pal = colorRampPalette(colours_2[1:10])
 gradientLegend(valRange=c(0,10), 
                color = pal(10),
                pos=c(0.05,0.1,.08,0.5), 
@@ -283,7 +281,7 @@ gradientLegend(valRange=c(0,10),
                border.col = "grey10",
                inside = T)
 
-pal = colorRampPalette(colors[11:20])
+pal = colorRampPalette(colours_2[11:20])
 gradientLegend(valRange=c(0,10), 
                color = pal(10),
                pos=c(0.12,0.1,.15,0.5), side=4,
@@ -363,6 +361,17 @@ people %>%
 The average is strongly impacted by the unbalanced situation within the network, meaning a group of six highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. 
 
 ```{r}
+# Create dataframe with names, in and out-degree
+names = get.vertex.attribute(net, "vertex.names")
+people = data.frame(names)
+people$indegree = indegree
+people$outdegree = outdegree
+people$degree = degree
+
+# Normalized indegree
+nodes = length(net$val) - 1
+people$norm_indegree = people$indegree / nodes 
+
 avg_indegree = mean(people$indegree)
 message("Average in degree: ", avg_indegree)
 median_indegree = median(sort(people$indegree))
@@ -394,11 +403,44 @@ ggplot(people)+
   geom_histogram(aes(x=indegree), stat="count", fill="cornflowerblue")+
   labs(title = "Distribution of in degree")+
   xlab("In degree centrality")+ylab("Number of students")
+```
 
 
-person = people[order(people$indegree), ]$names
+```{r}
+par(mar=c(0,0,0,0)) # Margin deletion
+sna::gplot(net,
+      gmode="digraph",    # directed network
+      jitter=F,
+      mode = "fruchtermanreingold",
+      edge.col="grey70",  # set color of ties
+      vertex.col=colours_1[attr$Ethnicity],   # set color of nodes
+      vertex.cex = log(indegree)+0.2,
+      vertex.sides= (attr$Gender-1)*47+4,
+      displaylabels=T,    # indicate that labels should be included
+      label.pos=1,        # indicate that labels should be given below points
+      label.cex=.7)       # indicate the size of the labels (1 is default)
 
-barplot(sort(people$indegree),
+legend("topright",
+       legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
+                  " ", "Gender", " Male", " Female"),
+       col = c("white",colours_1[1],colours_1[2],colours_1[3],
+               "white","white","black","black"), 
+       bty = "n", 
+       pch =c(15,15,15,15,15,15,19,18),
+       pt.cex = c(0,2.1,2.1, 2.1,
+                  0,0,2.1,2.1), 
+       cex = 1, 
+       text.col = "grey10", 
+       horiz = F , 
+       inset = c(0.01))
+```
+
+
+If the in-degree-centrality is considered, Sara is the most central node. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in-degree measure refers to the number of bullies a node must face. Therefore, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375 \%$ of the other nodes (normalization through $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$ with $n$ number of nodes).  Sara's condition in comparison with the worst case scenario, namely a complete centralization with 24 bullies and a single victim, results partially positive. However, if the average indegree is computed (having standard deviation $sd \pm$ `r round(sd(people$indegree),2)`), the value seems extremely high but does not take into consideration the distribution of indegree values. 
+
+```{r}
+person = people[order(people$indegree), ]$names 
+barplot(sort(people$indegree), 
      main="Histogram for Indegree Values",
      names.arg = person,
      ylab="Indegree",
@@ -495,22 +537,55 @@ Once again, the outdegree measure shows an imbalanced situation assessing a sign
 -   What does it mean substantively?
 
 ```{r}
+
 grade = attr$Grade
-cor_value = cor(grade, indegree, method = c("pearson"))
+cor_value = cor(indegree, grade, method = c("pearson"))
+cor_value
 summary(cor_value)
 
 # Creating the plot
-plot(grade, indegree, pch = 19, col = "#001219")
-abline(lm(indegree ~ grade), col = "#ae2012", lwd = 3)
-text(1,4, paste("Cor:", round(cor_value, 2)), col = 2, adj = c(0, -.1)) 
+plot(indegree, grade, 
+     pch = 19,col = "#001219", 
+     xlab="Indegree", ylab = "Grade", 
+     main = "Correlation between indegree and grade", 
+     xlim = c(0, max(indegree)+0.5), 
+     ylim = c(0,10), xaxt="n")
+axis(1, at = seq(0, 9, by = 1), las=2)
+abline(lm(grade ~ indegree ), col = "#ae2012", lwd = 3)
+
+text(1,4, expression(paste(rho, ": 0.85")), col = "#ae2012", adj = c(0, -.1)) 
+
+cor.test(indegree,grade)
 
 ```
+
+The Pearson coefficient, namely the correlation coefficient, is slightly above 0.85. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., indegree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
+- statistically significant due to low p-value 
 
 ------------------------------------------------------------------------
 
 *Perform a significance test using a permutation-based approach for the correlation as discussed in class. What does the significance test do and what do you conclude?*
 
 ```{r}
+set.seed(21)
+
+permutation = matrix(NA,1000,1)
+for (k in c(1:1000))
+{
+  grade_perm = sample(grade)
+  permutation[k,1] = cor(indegree, grade_perm)
+}
+
+hist(permutation, prob=TRUE, 
+     xlim=c(-1.0,1.0), ylim = c(0.0, 2.0), 
+     xlab = "Value of permutation", col = "#f2cc8f")
+
+x <- seq(min(permutation), max(permutation))
+curve(dnorm(x, mean=mean(permutation), sd=sd(permutation)), 
+      col="#3d405b", lwd=2, add=TRUE)
+text(x = 0.56, y = cor(indegree, grade), expression(paste("N~(", mu, "= 0.0, ", omega, "= 0.2)")), col = "#3d405b")
+abline(v=cor(indegree, grade), lwd=2, col="#ae2012")
+text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade), expression(paste(rho, ": 0.85")), col = "#ae2012")
 ```
 
 
