@@ -34,7 +34,7 @@ library(tidyverse)
 library(sna)
 library(itsadug) # For gradient legend
 library(knitr)
-library(formattable)
+library(formattable) # For nice tables
 ```
 
 ## Data import
@@ -328,6 +328,9 @@ degree = sna::degree(net, gmode="digraph")
 In order to properly present the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (i.e. sum of both in and out-degree). 
 
 ```{r}
+tile_colors = c("#B78FB5", # lilac
+                "#25D0BC", # green
+                "#71A2C1")
 # Create dataframe with names, in and out-degree
 names = net %v% "vertex.names"    # Get vertex names
 people = data.frame(Name = names) # Create data frame with names column
@@ -346,16 +349,16 @@ median_indegree = median(people$`In degree`)
 people$`Above Average` =  ifelse(indegree<=avg_indegree, "No", "Yes")
     
 people %>%
-  arrange(desc(indegree)) %>%
-  formattable(align = c("l",rep("c",5)),
-              list(
-              'Name' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")),
-              'In degree' = color_tile("transparent", "#B78FB3"),
-              'Out degree' = color_tile("transparent", "#1FAD9D"),
-              'Degree' = color_tile("transparent", "#1FAD9D"),
-              'Normalized In degree' = color_tile("transparent", "#B78FB3"),
-              'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
-                                          style = x ~ style(color = ifelse(x == "Yes", "#1FAD9D", "#B78FB3")))))
+    arrange(desc(indegree)) %>%
+    formattable(align = c("l",rep("c",5)),
+                list(
+                    'Name' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")),
+                    'In degree' = color_tile("transparent", tile_colors[1]),
+                    'Out degree' = color_tile("transparent",tile_colors[2]),
+                    'Degree' = color_tile("transparent", tile_colors[2]),
+                    'Normalized In degree' = color_tile("transparent", tile_colors[1]),
+                    'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
+                                                style = x ~ style(color = ifelse(x == "Yes", tile_colors[1], tile_colors[2])))))
 ```
 
 ```{r}
@@ -468,12 +471,12 @@ people %>%
   formattable(align = c("l",rep("c",5)),
               list(
               'Name' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")),
-              'In degree' = color_tile("transparent", "#1FAD9D"),
-              'Out degree' = color_tile("transparent", "#B78FB3"),
-              'Degree' = color_tile("transparent", "#1FAD9D"),
-              'Normalized Out degree' = color_tile("transparent", "#B78FB3"),
+              'In degree' = color_tile("transparent", tile_colors[1]),
+              'Out degree' = color_tile("transparent",  tile_colors[2]),
+              'Degree' = color_tile("transparent",  tile_colors[2]),
+              'Normalized Out degree' = color_tile("transparent",  tile_colors[1]),
               'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
-                                          style = x ~ style(color = ifelse(x == "Yes", "#1FAD9D", "#B78FB3")))))
+                                          style = x ~ style(color = ifelse(x == "Yes",  tile_colors[2],  tile_colors[1])))))
 ```
 
 
@@ -485,7 +488,7 @@ gplot(net,
       gmode="digraph",    # directed network
       jitter=F,
       edge.col="grey70",  # set color of ties
-      vertex.col= ifelse(outdegree == max_od , "salmon", "lightblue"),
+      vertex.col= ifelse(outdegree == max(outdegree) , "salmon", "lightblue"),
       vertex.cex = sizes[outdegree]+0.5,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
@@ -647,7 +650,6 @@ text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade),
 
 <aside>
 💡 *Calculate the in-degree and out-degree centralization for this network using the approach discussed in class and interpret. Make sure to show how you came to these answers.*
-
     
 💡 *What do you conclude substantively (taking into account that the network is "who do you bully?")?*
 
@@ -660,7 +662,7 @@ Centralization is a question about how central some nodes are compared to other 
 In an undirected network, centralization is computed as follows:
 
 $$
-Centralisation = \frac{\sum (\max-degree_i)}{(n-1)(n-2)}
+Centralization = \frac{\sum (\max-degree_i)}{(n-1)(n-2)}
 $$
 The most centralized network is the one that has a single node in the center, which that links every other node in the network. In this case the maximum degree is $(n-1)$, therefore the centralization index is:
 
@@ -674,18 +676,23 @@ C = \frac{(24-24)*25}{24*23} = \frac{0}{23*24} = 0
 $$
 
 ```{r}
-# Total degree centralisation
+# Total degree centralization
 sna::centralization(net,sna::degree)
 ```
 In the studied network, the centralization index is $0.111413$, which indicates a fairly decentralized network. 
 
 Since the bullying network is directed, it is possible to distinguish the centralization index into in degree and out degree. As the table shows, the in degree is higher than the out degree centralization index, indicating a more centralized bullied network (i.e. a few of them are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others). Notice that both these indexes are higher than the previous centralization index, indicating two more centralized networks if separated than if joined in an undirected one. 
 
-```{r}
-      # In degree centralisation
-formattable(data.frame(cbind("In degree Centralisation Index" = sna::centralization(net,sna::degree, cmode="indegree"),
-      # Out degree centralisation
-      "Out degree Centralisation Index" = sna::centralization(net,sna::degree, cmode="outdegree"))))
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+table = formattable(data.frame(
+    "Centralization index" = sna::centralization(net,sna::degree),
+    # In degree centralization
+    "In degree Centralization Index" = sna::centralization(net,sna::degree, cmode="indegree"),
+    # Out degree centralization
+    "Out degree Centralization Index" = sna::centralization(net,sna::degree, cmode="outdegree")))
+
+names(table) = c("Centralization Index", "In degree Centralization Index", "Out degree Centralization Index")
+table
 ```
 
 Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in terms of centralization index, the computed ones are closer to the minimal reference point than the maximal, leading to the conclusion of a decentralized network. 
@@ -693,10 +700,11 @@ Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in te
 The following table resumes closeness, betweenness and Bonacich Power centrality per each student:
 
 ```{r}
-## Betweenness centrality
-betweenness = sna::betweenness(net, gmode="digraph")/(25*24/2)
+## Betweenness centrality normalized
+betweenness = round(sna::betweenness(net, gmode="digraph")/(25*24/2),3)
 ## Bonacich Power Centrality
-bonpow = sna::bonpow(net, gmode="digraph", exponent=0)
+bonpow = round(sna::bonpow(net, gmode="digraph", exponent=0)/
+                   sum(sna::bonpow(net, gmode="digraph", exponent=0)),3)
 
 ## Constraint index
 library(igraph)
@@ -705,16 +713,23 @@ i_net<-graph_from_adjacency_matrix(as.matrix(read.csv("bullying_network.csv",
                                                       stringsAsFactors = F)),
                                    mode="directed", diag=F)
 
-con_ind = constraint(i_net)
+con_ind = round(constraint(i_net),3)
 ```
 
 ```{r echo=FALSE}
-as.datatable(formattable(data.frame(cbind(betweenness,
-                             bonpow,
-                             con_ind)),
-            'betweenness' = color_bar("lightpink"),
-            align = c("l",rep("c",3))))
+
+formattable(data.frame(cbind("Betweenness" = betweenness,
+                             "Bonacich Power Centrality" = bonpow,
+                             "Constraint Index" = con_ind)),
+            list(
+                'Betweenness' = color_bar(tile_colors[1]),
+                "Bonacich.Power.Centrality" = color_bar(tile_colors[2]),
+                "Constraint.Index" = color_tile("lightblue", tile_colors[3])),
+            align = c("r","r","c"))
 ```
+
+Burt's Constraint index is higher if ego has less, or mutually stronger related (i.e. more redundant) contacts.
+
 
 ## Reciprocity
 
