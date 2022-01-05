@@ -1,14 +1,11 @@
 ---
 title: "Bullying Network"
 author: "Aurora Maria Tumminello, Lucia Hrovatin"
-output:
-  html_document:
+output: 
+  html_notebook: 
     toc: yes
-    df_print: paged
-  html_notebook:
-    toc: yes
-    highlight: monochrome
-    theme: journal
+    highlight: pygments
+    theme: paper
 ---
 
 # Importing data
@@ -32,16 +29,12 @@ As forehead described, the original Excel file contains two sheets. To retrieve 
 
 ## Libraries
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(sna)
 library(itsadug) # For gradient legend
 library(knitr)
 library(formattable)
-
-customGreen0 = "#DeF7E9"
-customGreen = "#71CA97"
-customRed = "#ff7f7f"
 ```
 
 ## Data import
@@ -300,14 +293,14 @@ gradientLegend(valRange=c(0,10),
 </aside>
 
 
-**Degree centrality** is defined as the number of links incident upon a node. Having a directed network implies splitting the degree into in degree and out degree. The former counts the number of incoming edges to a node, while the latter refers to the number of edges a node directs to others [Freeman, L. C. (1978), Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.]. 
+**Degree centrality** is defined as the number of links incident upon a node. Having a directed network implies splitting the degree into in-degree and out-degree. The former counts the number of incoming edges to a node, while the latter refers to the number of edges a node directs to others *[Freeman, L. C. (1978), Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.]*. 
 
 When edges express positive aspects (e.g., friendship, collaboration), in degree can be interpreted as a form of popularity and out degree as gregariousness. However, a reversed scenario is presented here due to the edges' negative connotation, i.e. bullying.
 
 ## In-degree
 
 <aside>
-💡 *Who is the most central when it comes to indegree?*
+💡 *Who is the most central when it comes to in-degree?*
 
 </aside>
 
@@ -338,46 +331,36 @@ In order to properly present the degrees, a dataframe has been created, with nam
 
 ```{r}
 # Create dataframe with names, in and out-degree
-names = get.vertex.attribute(net, "vertex.names")
-people = data.frame(Name = names)
-people$indegree = indegree
-people$outdegree = outdegree
-people$degree = degree
+names = net %v% "vertex.names"    # Get vertex names
+people = data.frame(Name = names) # Create data frame with names column
+people$`In degree` = indegree        # Insert in degree
+people$`Out degree` = outdegree      # Insert out degree
+people$Degree = degree            # Insert total degree
 
 # Normalized indegree
 nodes = length(net$val) - 1
-people$norm_indegree = round(people$indegree / nodes,2)
+people$`Normalized In degree` = round(people$`In degree`/nodes,2)
 
+# Average and median in degree
+avg_indegree = mean(people$`In degree`)
+median_indegree = median(people$`In degree`)
+
+people$`Above Average` =  ifelse(indegree<=avg_indegree, "No", "Yes")
+    
 people %>%
   arrange(desc(indegree)) %>%
-  formattable(align = c("l",rep("c",4)),
+  formattable(align = c("l",rep("c",5)),
+              list(
               'Name' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")),
-              'indegree' = color_tile(customGreen, customGreen0),
-              'outdegree' = color_tile(customGreen, customGreen0),
-              'degree' = color_tile(customGreen, customGreen0),
-              'norm_degree' = color_tile(customGreen, customGreen0))
+              'In degree' = color_tile("transparent", "#B78FB3"),
+              'Out degree' = color_tile("transparent", "#1FAD9D"),
+              'Degree' = color_tile("transparent", "#1FAD9D"),
+              'Normalized In degree' = color_tile("transparent", "#B78FB3"),
+              'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
+                                          style = x ~ style(color = ifelse(x == "Yes", "#1FAD9D", "#B78FB3")))))
 ```
 
-The average is strongly impacted by the unbalanced situation within the network, meaning a group of six highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. 
-
 ```{r}
-# Create dataframe with names, in and out-degree
-names = get.vertex.attribute(net, "vertex.names")
-people = data.frame(names)
-people$indegree = indegree
-people$outdegree = outdegree
-people$degree = degree
-
-# Normalized indegree
-nodes = length(net$val) - 1
-people$norm_indegree = people$indegree / nodes 
-
-avg_indegree = mean(people$indegree)
-message("Average in degree: ", avg_indegree)
-median_indegree = median(sort(people$indegree))
-message("Median in degree: ", median_indegree)
-
-
 results = data.frame(Measures = c("Most central node", 
                                   "Max in degree",
                                   "(Theoretical) max in degree", 
@@ -385,7 +368,8 @@ results = data.frame(Measures = c("Most central node",
                                   "(Theoretical) min in degree",
                                   "Average in degree", 
                                   "Median in degree"))
-results$Value = c(people[which.max(people$indegree),]$names,
+
+results$Value = c(people[which.max(people$indegree),]$Name,
                   max(people$indegree),
                   nodes,
                   min(people$indegree),
@@ -394,10 +378,15 @@ results$Value = c(people[which.max(people$indegree),]$names,
                   median_indegree)
 
 formattable(results,
-            'Measure' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")))
+            align = c("l","l"))
 ```
 
-```{r}
+
+
+The average is strongly impacted by the unbalanced situation within the network, meaning a group of six highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. 
+
+
+```{r warning=FALSE}
 # In-degree distribution among nodes
 ggplot(people)+
   geom_histogram(aes(x=indegree), stat="count", fill="cornflowerblue")+
@@ -406,7 +395,33 @@ ggplot(people)+
 ```
 
 
+
+
 ```{r}
+person = people[order(people$indegree), ]$names 
+barplot(sort(people$indegree), 
+     main="Histogram for Indegree Values",
+     names.arg = person,
+     ylab="Indegree",
+     border="#a8dadc",
+     col="#a8dadc",
+     las = 2)
+abline(a=avg_indegree, b= 0, col = "red")
+text(1,4, "avg indegree = 3.04", col = 2, adj = c(0, -.1))
+```
+
+By taking into consideration the in-degree centrality, Sara can be defined as the most central node, followed by Gianna and Marco. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in degree measure refers to the number of bullies a node must face. Consequently, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375\%$ of the other nodes (normalization obtained by $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$, with $n$ number of nodes). 
+
+In the worst case scenario, Sara would be bullied by 24 students and she would be the only victim. However, despite her seeming far from the depicted scenario, her in-degree looks extremely high considering the average and the median in the degree of the entire network. The same happens for students like Gianna, Marco, Andrea, Mario and Valentina. 
+
+It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.
+
+
+```{r}
+######################
+# IMPROVE PLOT
+######################
+
 par(mar=c(0,0,0,0)) # Margin deletion
 sna::gplot(net,
       gmode="digraph",    # directed network
@@ -435,29 +450,6 @@ legend("topright",
        inset = c(0.01))
 ```
 
-
-If the in-degree-centrality is considered, Sara is the most central node. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in-degree measure refers to the number of bullies a node must face. Therefore, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375 \%$ of the other nodes (normalization through $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$ with $n$ number of nodes).  Sara's condition in comparison with the worst case scenario, namely a complete centralization with 24 bullies and a single victim, results partially positive. However, if the average indegree is computed (having standard deviation $sd \pm$ `r round(sd(people$indegree),2)`), the value seems extremely high but does not take into consideration the distribution of indegree values. 
-
-```{r}
-person = people[order(people$indegree), ]$names 
-barplot(sort(people$indegree), 
-     main="Histogram for Indegree Values",
-     names.arg = person,
-     ylab="Indegree",
-     border="#a8dadc",
-     col="#a8dadc",
-     las = 2)
-abline(a=avg_indegree, b= 0, col = "red")
-text(1,4, "avg indegree = 3.04", col = 2, adj = c(0, -.1))
-```
-
-By taking into consideration the in-degree centrality, Sara can be defined as the most central node, followed by Gianna and Marco. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in degree measure refers to the number of bullies a node must face. Consequently, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375\%$ of the other nodes (normalization obtained by $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$, with $n$ number of nodes). 
-
-In the worst case scenario, Sara would be bullied by 24 students and she would be the only victim. However, despite her seeming far from the depicted scenario, her in-degree looks extremely high considering the average and the median in the degree of the entire network. The same happens for students like Gianna, Marco, Andrea, Mario and Valentina. 
-
-It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.
-
-
 ### Outdegree
 
 <aside>
@@ -480,11 +472,15 @@ people$outdegree = outdegree
 max_od = max(outdegree)
 
 # Normalized outdegree
-people$norm_outdegree = people$outdegree / nodes 
-people$norm_outdegree
+people$norm_outdegree = round(people$outdegree / nodes, 3)
 
 people %>%
-  arrange(desc(outdegree))
+  arrange(desc(outdegree)) %>%
+    formattable(align=c("l",rep("l",5)),
+                list(
+                    indegree = color_bar("lightgreen"),
+                    outdegree = color_bar("lightpink"),
+                    degree = color_bar("lightblue")))
 ```
 
 There is no unique central node in the case of the out degree measure. Thus, Angela, Aurora, and Francesco can be detected as the three most central nodes (as shown in the network below). It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below.
@@ -497,7 +493,7 @@ gplot(net,
       jitter=F,
       edge.col="grey70",  # set color of ties
       vertex.col= ifelse(outdegree == max_od , "salmon", "lightblue"),
-      vertex.cex = sizes[outdegree]+1,
+      vertex.cex = sizes[outdegree]+0.5,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
       label.cex=.7)       # indicate the size of the labels (1 is default)
@@ -506,14 +502,33 @@ gplot(net,
  
 
 ```{r}
-
 avg_outdegree = mean(people$outdegree)
 median_outdegree = median(sort(people$outdegree))
 
-headers = c("Most central", "Max outdegree", "Min outdegree", "Avg outdegree", "Median outdegree")
-outdegree_measure = c(tail(sort(people$outdegree), n=1), nodes, 0, avg_outdegree , median_outdegree )
-tab = rbind(headers, outdegree_measure, deparse.level = 0 )                   
-knitr::kable(tab, caption = "Summary table of the outdegree reference points")
+
+results = data.frame(Measures = c("Most central node", 
+                                  "Max in degree",
+                                  "(Theoretical) max in degree", 
+                                  "Min in degree", 
+                                  "(Theoretical) min in degree",
+                                  "Average in degree", 
+                                  "Median in degree"))
+results$Value = c(people[which.max(people$indegree),]$names,
+                  max(people$indegree),
+                  nodes,
+                  min(people$indegree),
+                  0, 
+                  avg_indegree, 
+                  median_indegree)
+
+library(formattable)
+formattable(results,
+            align = c("l","c"),
+            list(
+            'Measures' = formatter("span", 
+                                  style = ~ style(color = "black")),
+            'Value' = formatter("span", 
+                                style = ~ style(color = "black"))))
 
 ```
 
