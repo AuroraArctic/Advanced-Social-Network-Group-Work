@@ -9,7 +9,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(dpi=300,fig.width=7)
+knitr::opts_chunk$set(dpi=400,fig.width=7)
 ```
 
 # Importing data
@@ -328,6 +328,7 @@ V(i_net)$title = paste0("<p><b>", attr$ID,"</b><br>",
 lnodes <- data.frame(label = c("1st immigrants","2nd immigrants","Italians","Females", "Males"),
                      shape = c(rep("triangle",3),"dot","square"), 
                      color = c(colours_1,"#B78FB5","#B78FB5"),
+                     font.size = 10,
                      title = "Informations") 
 
 # Creation of the visNetwork object
@@ -336,12 +337,14 @@ new_net = toVisNetworkData(i_net)
 # Actual visualization
 visNetwork(nodes = new_net$nodes,
            edges = new_net$edges,
-           height = "800px", width = "100%") %>%
+           height = "800px", width = "100%",
+           font.size = 9,
+           physics = T) %>%
     visEdges(arrows = "to") %>%
     visOptions(highlightNearest = TRUE, 
                selectedBy = "ethnicity") %>%
     visIgraphLayout(layout = "layout.fruchterman.reingold") %>%
-    visLegend(addNodes = lnodes, useGroups = FALSE, ncol = 3)
+    visLegend(addNodes = lnodes, useGroups = FALSE, ncol = 1)
 ```
 
 
@@ -352,8 +355,7 @@ visNetwork(nodes = new_net$nodes,
 
 </aside>
 
-
-**Degree centrality** is defined as the number of links incident upon a node. Having a directed network implies splitting the degree into in-degree and out-degree. The former counts the number of incoming edges to a node, while the latter refers to the number of edges a node directs to others *[Freeman, L. C. (1978), Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.]*. 
+**Degree centrality** is defined as the number of links incident upon a node. Having a directed network implies splitting the degree into in-degree and out-degree. The former counts the number of incoming edges to a node, while the latter refers to the number of edges a node directs to others^[Freeman, L. C. (1978), Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.]. 
 
 When edges express positive aspects (e.g., friendship, collaboration), in degree can be interpreted as a form of popularity and out degree as gregariousness. However, a reversed scenario is presented here due to the edges' negative connotation, i.e. bullying.
 
@@ -767,29 +769,24 @@ bonpow = round(sna::bonpow(net, gmode="digraph", exponent=0)/
                    sum(sna::bonpow(net, gmode="digraph", exponent=0)),3)
 
 ## Constraint index
-
-i_net<-graph_from_adjacency_matrix(as.matrix(read.csv("bullying_network.csv",
-                                                      row.names = 1, 
-                                                      stringsAsFactors = F)),
-                                   mode="directed", diag=F)
-
 con_ind = round(constraint(i_net),3)
-```
-
-```{r echo=FALSE}
+con_ind[is.na(con_ind)] <- 0
 
 formattable(data.frame(cbind("Betweenness" = betweenness,
-                             "Bonacich Power Centrality" = bonpow,
-                             "Constraint Index" = con_ind)),
+                             "Constraint Index" = con_ind,
+                             "Bonacich Power Centrality" = bonpow
+                             )),
             list(
-                'Betweenness' = color_tile(tile_colors[1],tile_colors[2]),
-                "Bonacich.Power.Centrality" = color_tile(tile_colors[1],tile_colors[2]),
-                "Constraint.Index" = color_tile(tile_colors[1],tile_colors[2])),
-            align = c("r","r","c"))
+                'Betweenness' = color_bar(tile_colors[1], proportion),
+                "Constraint.Index" = color_bar(tile_colors[3]),
+                "Bonacich.Power.Centrality" = color_bar(tile_colors[2]), proportion),
+            align = c("r","c","l"))
 ```
+Comment betweenness
 
-As defined in the documentation, Burt's Constraint index is higher if ego has less, or mutually stronger related (i.e. more redundant) contacts. This means that
+As defined by Borgatti et al.^[Stephen P. Borgatti, Martin G. Everett, Jeffrey C. Johnson. *Analyzing Social Networks*, 2nd Edition (2018).], Burt's constraint index is another way of measuring the extent to which ego’s alters have ties to each other by measuring the extent to which ego invests time and energy in alters who invest in each other. 
 
+Comment Bonacich
 
 ## Reciprocity
 
