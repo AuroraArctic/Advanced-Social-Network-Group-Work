@@ -385,6 +385,9 @@ outdegree = sna::degree(net, gmode="digraph", cmode = "outdegree")
 
 # Overall Degree
 degree = sna::degree(net, gmode="digraph")
+
+attr$indegree = indegree
+attr$outdegree = outdegree
 ```
 
 In order to properly present the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (i.e. sum of both in and out-degree). 
@@ -466,37 +469,33 @@ In the worst case scenario, Sara would be bullied by 24 students and she would b
 
 It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.
 
+Note that the following plot's nodes size indicates whether the indegree
+
 ```{r}
-######################
-# IMPROVE PLOT
-######################
+# Setting colours, shapes, sizes, ethnicity, gender, title
+V(i_net)$color = colours_1[attr$Ethnicity]
+V(i_net)$shape = c("dot","square")[attr$Gender+1]
+V(i_net)$size = ifelse(people$`Above Average`== "Yes",30,10)
+V(i_net)$ethnicity = ifelse(attr$Ethnicity==3, "Italian",
+                            ifelse(attr$Ethnicity == 1,"1st immigrant", "2nd immigrant"))
+V(i_net)$gender = ifelse(attr$Gender == 0, "Female","Male")
+V(i_net)$title = paste0("<p><b>", attr$ID,"</b><br>",
+                        V(i_net)$gender,", ",attr$Grade,", ",
+                        V(i_net)$ethnicity,"<br>In degree: ",
+                        attr$indegree,"</p>")
 
-par(mar=c(0,0,0,0)) # Margin deletion
-sna::gplot(net,
-      gmode="digraph",    # directed network
-      jitter=F,
-      mode = "fruchtermanreingold",
-      edge.col="grey70",  # set color of ties
-      vertex.col=colours_1[attr$Ethnicity],   # set color of nodes
-      vertex.cex = log(indegree)+0.2,
-      vertex.sides= (attr$Gender-1)*47+4,
-      displaylabels=T,    # indicate that labels should be included
-      label.pos=1,        # indicate that labels should be given below points
-      label.cex=.7)       # indicate the size of the labels (1 is default)
+# Creation of the visNetwork object
+new_net = toVisNetworkData(i_net)
 
-legend("topright",
-       legend = c("Ethnicity"," 1st gen immigrants", " 2st gen immigrants", " Italian",
-                  " ", "Gender", " Male", " Female"),
-       col = c("white",colours_1[1],colours_1[2],colours_1[3],
-               "white","white","black","black"), 
-       bty = "n", 
-       pch =c(15,15,15,15,15,15,19,18),
-       pt.cex = c(0,2.1,2.1, 2.1,
-                  0,0,2.1,2.1), 
-       cex = 1, 
-       text.col = "grey10", 
-       horiz = F , 
-       inset = c(0.01))
+# Actual visualization
+visNetwork(nodes = new_net$nodes,
+           edges = new_net$edges,
+           height = "800px", width = "100%",
+           font.size = 9,
+           physics = T) %>%
+    visEdges(arrows = "to") %>%
+    visOptions(highlightNearest = TRUE) %>%
+    visIgraphLayout(layout = "layout.fruchterman.reingold")
 ```
 
 ## Outdegree
@@ -513,6 +512,7 @@ legend("topright",
 💡 *Make sure to discuss the reference points for the outdegree measure. How does it compare to the theoretical minimum and maximum value?*
 
 </aside>
+
 
 There is no unique central node in the case of the out degree measure. Thus, Angela, Aurora, and Francesco can be detected as the three most central nodes (as shown in the network below). It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below.
 
@@ -542,23 +542,6 @@ people %>%
                                                 style = x ~ style(color = ifelse(x == "Yes",  tile_colors[2],  tile_colors[1])))))
 ```
 
-
-
-
-```{r}
-par(mar=c(0,0,0,0)) # Margin deletion
-gplot(net,
-      gmode="digraph",    # directed network
-      jitter=F,
-      edge.col="grey70",  # set color of ties
-      vertex.col= ifelse(outdegree == max(outdegree) , "salmon", "lightblue"),
-      vertex.cex = sizes[outdegree]+0.5,
-      displaylabels=T,    # indicate that labels should be included
-      label.pos=1,        # indicate that labels should be given below points
-      label.cex=.7)       # indicate the size of the labels (1 is default)
-```
-
- 
 
 ```{r}
 results = data.frame(Measures = c("Most central node", 
@@ -606,6 +589,33 @@ ggplot(people)+
 
 Once again, the out-degree measure shows an imbalanced situation assessing a significant gap between the lowest extreme cases, such as 0, and the highest ones. The imbalance is determined by the three central nodes that become the primary senders of bullying acts. 
 
+```{r}
+# Setting colours, shapes, sizes, ethnicity, gender, title
+V(i_net)$color = colours_1[attr$Ethnicity]
+V(i_net)$shape = c("dot","square")[attr$Gender+1]
+V(i_net)$size = ifelse(people$`Above Average`== "Yes",30,10)
+V(i_net)$ethnicity = ifelse(attr$Ethnicity==3, "Italian",
+                            ifelse(attr$Ethnicity == 1,"1st immigrant", "2nd immigrant"))
+V(i_net)$gender = ifelse(attr$Gender == 0, "Female","Male")
+V(i_net)$title = paste0("<p><b>", attr$ID,"</b><br>",
+                        V(i_net)$gender,", ",attr$Grade,", ",
+                        V(i_net)$ethnicity,"<br>Out degree: ",
+                        attr$outdegree,"</p>")
+
+# Creation of the visNetwork object
+new_net = toVisNetworkData(i_net)
+
+# Actual visualization
+visNetwork(nodes = new_net$nodes,
+           edges = new_net$edges,
+           height = "800px", width = "100%",
+           font.size = 9,
+           physics = T) %>%
+    visEdges(arrows = "to") %>%
+    visOptions(highlightNearest = TRUE) %>%
+    visIgraphLayout(layout = "layout.fruchterman.reingold")
+```
+
 ## Correlations
 
 <aside>
@@ -646,10 +656,6 @@ This section hosts t-tests and variance tests which try to identify differences 
 However, no significant p-value was obtained from these tests. This means that gender is not a discriminant in the bullying behaviour inside the class. 
 
 ```{r}
-# Mean and variance on gender
-attr$indegree = indegree
-attr$outdegree = outdegree
-
 # GENDER SIGNIFICANCE TEST
 # Mean difference between males and females (in degree)
 t.test(filter(attr,Gender==0)$indegree,
