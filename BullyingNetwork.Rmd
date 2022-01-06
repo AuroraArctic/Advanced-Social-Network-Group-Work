@@ -759,35 +759,6 @@ table
 
 Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in terms of centralization index, the computed ones are closer to the minimal reference point than the maximal, leading to the conclusion of a decentralized network. 
 
-The following table resumes closeness, betweenness and Bonacich Power centrality per each student:
-
-```{r}
-## Betweenness centrality normalized
-betweenness = round(sna::betweenness(net, gmode="digraph")/(25*24/2),3)
-## Bonacich Power Centrality
-bonpow = round(sna::bonpow(net, gmode="digraph", exponent=0)/
-                   sum(sna::bonpow(net, gmode="digraph", exponent=0)),3)
-
-## Constraint index
-con_ind = round(constraint(i_net),3)
-con_ind[is.na(con_ind)] <- 0
-
-formattable(data.frame(cbind("Betweenness" = betweenness,
-                             "Constraint Index" = con_ind,
-                             "Bonacich Power Centrality" = bonpow
-                             )),
-            list(
-                'Betweenness' = color_bar(tile_colors[1], proportion),
-                "Constraint.Index" = color_bar(tile_colors[3]),
-                "Bonacich.Power.Centrality" = color_bar(tile_colors[2]), proportion),
-            align = c("r","c","l"))
-```
-Comment betweenness
-
-As defined by Borgatti et al.^[Stephen P. Borgatti, Martin G. Everett, Jeffrey C. Johnson. *Analyzing Social Networks*, 2nd Edition (2018).], Burt's constraint index is another way of measuring the extent to which ego’s alters have ties to each other by measuring the extent to which ego invests time and energy in alters who invest in each other. 
-
-Comment Bonacich
-
 ## Reciprocity
 
 <aside>
