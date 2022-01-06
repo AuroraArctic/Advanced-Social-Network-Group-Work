@@ -35,6 +35,7 @@ library(sna)
 library(itsadug) # For gradient legend
 library(knitr)
 library(formattable) # For nice tables
+library(igraph)
 ```
 
 ## Data import
@@ -68,9 +69,12 @@ Students attributes have been saved in a distinct file and, therefore, imported 
 
 ```{r}
 # Reading the csv file with node attributes
-attr = read.csv("bullying_attributes.csv")
+attr = read.csv("bullying_attributes.csv", 
+                colClasses = c("character","factor","numeric","factor"))
+summary(attr)
 ```
-
+As can be seen from the summary, there are more males than females, but, since the class has an odd number of students, this distinction is not significant. 
+Instead, ethnicity is pretty unequal, showing 11 immigrants and 14 Italians. Related to grade, the minimum is 3 despite the grade normally starts from 0, while the maximum is 10. Both the median and the mean are around 6, which is the sufficiency. 
 
 # Drawing a network
 
@@ -707,7 +711,7 @@ bonpow = round(sna::bonpow(net, gmode="digraph", exponent=0)/
                    sum(sna::bonpow(net, gmode="digraph", exponent=0)),3)
 
 ## Constraint index
-library(igraph)
+
 i_net<-graph_from_adjacency_matrix(as.matrix(read.csv("bullying_network.csv",
                                                       row.names = 1, 
                                                       stringsAsFactors = F)),
@@ -722,13 +726,13 @@ formattable(data.frame(cbind("Betweenness" = betweenness,
                              "Bonacich Power Centrality" = bonpow,
                              "Constraint Index" = con_ind)),
             list(
-                'Betweenness' = color_bar(tile_colors[1]),
-                "Bonacich.Power.Centrality" = color_bar(tile_colors[2]),
-                "Constraint.Index" = color_tile("lightblue", tile_colors[3])),
+                'Betweenness' = color_tile(tile_colors[1],tile_colors[2]),
+                "Bonacich.Power.Centrality" = color_tile(tile_colors[1],tile_colors[2]),
+                "Constraint.Index" = color_tile(tile_colors[1],tile_colors[2])),
             align = c("r","r","c"))
 ```
 
-Burt's Constraint index is higher if ego has less, or mutually stronger related (i.e. more redundant) contacts.
+As defined in the documentation, Burt's Constraint index is higher if ego has less, or mutually stronger related (i.e. more redundant) contacts. This means that
 
 
 ## Reciprocity
