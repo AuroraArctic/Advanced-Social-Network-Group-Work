@@ -8,6 +8,10 @@ output:
     theme: paper
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi=300,fig.width=7)
+```
+
 # Importing data
 
 ## Data Structure
@@ -36,6 +40,7 @@ library(itsadug) # For gradient legend
 library(knitr)
 library(formattable) # For nice tables
 library(igraph)
+library(visNetwork)
 ```
 
 ## Data import
@@ -72,12 +77,14 @@ Students attributes have been saved in a distinct file and, therefore, imported 
 attr = read.csv("bullying_attributes.csv", 
                 colClasses = c("character","factor","numeric","factor"))
 summary(attr)
-
-# Re-importing as numerical for the following plots and measures
-attr = read.csv("bullying_attributes.csv")
 ```
 As can be seen from the summary, there are more males than females, but, since the class has an odd number of students, this distinction is not significant. 
 Instead, ethnicity is pretty unequal, showing 11 immigrants and 14 Italians. Related to grade, the minimum is 3 despite the grade normally starts from 0, while the maximum is 10. Both the median and the mean are around 6, which is the sufficiency. 
+
+```{r}
+# Re-importing as numerical for the following plots and measures
+attr = read.csv("bullying_attributes.csv")
+```
 
 # Drawing a network
 
@@ -87,7 +94,7 @@ Instead, ethnicity is pretty unequal, showing 11 immigrants and 14 Italians. Rel
 💡 *Draw the network using the Fruchterman-Reingold layout with names (but without attributes).*
 </aside>
 
-```{r}
+```{r, dpi=600}
 par(mar=c(0,0,0,0)) # Margin deletion
 gplot(net,
       gmode="digraph",    # directed network
@@ -99,8 +106,7 @@ gplot(net,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
       label.cex=.7,       # indicate the size of the labels (1 is default)
-			arrowhead.cex = 0.4,
-			object.scale = 0.01)
+      arrowhead.cex = 0.4)
 ```
 
 The *Fruchterman-Reingold* layout is the default mode of the `gplot()` function and therefore it is not necessary to include it. Overall there are 25 labelled nodes connected through directed links which represent who bullies whom. In particular, there is a student, Roberto, that does not present incoming or outgoing edges and, following the definition of Wasserman & Faust (1994), it is defined as an isolate^[Wasserman, S., & Faust, K. (1994). Social network analysis: Methods and applications]. Therefore, Roberto is the only student in this specific school class that is not bullied and does not bully either.  
@@ -290,6 +296,53 @@ gradientLegend(valRange=c(0,10),
                inside = T)
 ```
 
+### Third interactive version
+
+This third version of the network exploits `visNetwork` to build an interactive visualization of the class, reproducing the first version aforehead proposed, where:
+
+- shapes indicate the gender (i.e. females as circles, males as squares);
+- colours indicate the ethnicity, as shown in the legend;
+- the size is handled on the basis of the grade of the single student.
+
+Moreover, ethnicity can be chosen through the selection above the plot.
+
+```{r}
+# Creation of the igraph network
+i_net<-graph_from_adjacency_matrix(as.matrix(read.csv("bullying_network.csv",
+                                                      row.names = 1, 
+                                                      stringsAsFactors = F)),
+                                   mode="directed", diag=F)
+
+# Setting colours, shapes, sizes, ethnicity, gender, title
+V(i_net)$color = colours_1[attr$Ethnicity]
+V(i_net)$shape = c("dot","square")[attr$Gender+1]
+V(i_net)$size = attr$Grade*3
+V(i_net)$ethnicity = ifelse(attr$Ethnicity==3, "Italian",
+                            ifelse(attr$Ethnicity == 1,"1st immigrant", "2nd immigrant"))
+V(i_net)$gender = ifelse(attr$Gender == 0, "Female","Male")
+V(i_net)$title = paste0("<p><b>", attr$ID,"</b><br>",
+                        V(i_net)$gender,", ",attr$Grade,", ",
+                        V(i_net)$ethnicity,"</p>")
+
+# Dataframe for the legend
+lnodes <- data.frame(label = c("1st immigrants","2nd immigrants","Italians","Females", "Males"),
+                     shape = c(rep("triangle",3),"dot","square"), 
+                     color = c(colours_1,"#B78FB5","#B78FB5"),
+                     title = "Informations") 
+
+# Creation of the visNetwork object
+new_net = toVisNetworkData(i_net)
+
+# Actual visualization
+visNetwork(nodes = new_net$nodes,
+           edges = new_net$edges,
+           height = "800px", width = "100%") %>%
+    visEdges(arrows = "to") %>%
+    visOptions(highlightNearest = TRUE, 
+               selectedBy = "ethnicity") %>%
+    visIgraphLayout(layout = "layout.fruchterman.reingold") %>%
+    visLegend(addNodes = lnodes, useGroups = FALSE, ncol = 3)
+```
 
 
 # Centrality
