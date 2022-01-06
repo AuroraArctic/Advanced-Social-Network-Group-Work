@@ -68,10 +68,13 @@ By inspecting the obtained network through `summary(net)`, we may notice:
 Students attributes have been saved in a distinct file and, therefore, imported separately. 
 
 ```{r}
-# Reading the csv file with node attributes
+# Reading the csv file with node attributes with given types for summary
 attr = read.csv("bullying_attributes.csv", 
                 colClasses = c("character","factor","numeric","factor"))
 summary(attr)
+
+# Re-importing as numerical for the following plots and measures
+attr = read.csv("bullying_attributes.csv")
 ```
 As can be seen from the summary, there are more males than females, but, since the class has an odd number of students, this distinction is not significant. 
 Instead, ethnicity is pretty unequal, showing 11 immigrants and 14 Italians. Related to grade, the minimum is 3 despite the grade normally starts from 0, while the maximum is 10. Both the median and the mean are around 6, which is the sufficiency. 
