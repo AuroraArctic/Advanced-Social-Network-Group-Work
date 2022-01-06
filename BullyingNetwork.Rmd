@@ -525,20 +525,21 @@ avg_outdegree = mean(people$`Out degree`)
 median_outdegree = median(sort(people$`Out degree`))
 
 people$`Above Average` =  ifelse(outdegree<=avg_outdegree, "No", "Yes")
-    
+
 people %>%
     select(Name, `Out degree`,`In degree`,
            Degree, `Normalized Out degree`, `Above Average`) %>%
-  arrange(desc(outdegree)) %>%
-  formattable(align = c("l",rep("c",5)),
-              list(
-              'Name' = formatter("span", style = ~ style(color = "grey",font.weight = "bold")),
-              'In degree' = color_tile("transparent", tile_colors[1]),
-              'Out degree' = color_tile("transparent",  tile_colors[2]),
-              'Degree' = color_tile("transparent",  tile_colors[2]),
-              'Normalized Out degree' = color_tile("transparent",  tile_colors[1]),
-              'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
-                                          style = x ~ style(color = ifelse(x == "Yes",  tile_colors[2],  tile_colors[1])))))
+    arrange(desc(outdegree)) %>%
+    formattable(align = c("l",rep("c",5)),
+                list(
+                    'Name' = formatter("span", style = ~ style(color = "grey",
+                                                               font.weight = "bold")),
+                    'In degree' = color_tile("transparent", tile_colors[1]),
+                    'Out degree' = color_tile("transparent",  tile_colors[2]),
+                    'Degree' = color_tile("transparent",  tile_colors[1]),
+                    'Normalized Out degree' = color_tile("transparent",  tile_colors[2]),
+                    'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
+                                                style = x ~ style(color = ifelse(x == "Yes",  tile_colors[2],  tile_colors[1])))))
 ```
 
 
@@ -583,8 +584,12 @@ formattable(results,
 ```
 
 Each of the three central out degree nodes bullies almost one-third of the overall network: 
-\[ \frac{outdegree}{n-1} = \frac{7}{24} = 0.291 \approx 0.29 \approx 1/3\]
-These values are high above the average of `r avg_outdegree` $\pm$ `r round(sd(people$outdegree),2)` but do reach extreme cases, such as a centralized network (i.e., maximum outdegree). Therefore, a visual interpretation of the out-degree distribution in a bar plot graph may help understand the underlying reasons for low reference points.    
+
+$$
+\left[ \frac{outdegree}{n-1} = \frac{7}{24} = 0.291 \approx 0.29 \approx 1/3\right]
+$$
+
+These values are high above the average of `r avg_outdegree` $\pm$ `r round(sd(people[,"Out degree"]),2)` but do reach extreme cases, such as a centralized network (i.e., maximum out-degree). Therefore, a visual interpretation of the out-degree distribution in a bar plot graph may help understand the underlying reasons for low reference points.    
 
 ```{r}
 ggplot(people)+
@@ -599,7 +604,7 @@ ggplot(people)+
     labs(title = "Distribution of Out degree Values")
 ```
 
-Once again, the outdegree measure shows an imbalanced situation assessing a significant gap between the lowest extreme cases, such as 0, and the highest ones.  The imbalance is determined by the three central nodes that become the primary senders of bullying acts. 
+Once again, the out-degree measure shows an imbalanced situation assessing a significant gap between the lowest extreme cases, such as 0, and the highest ones. The imbalance is determined by the three central nodes that become the primary senders of bullying acts. 
 
 ## Correlations
 
@@ -636,10 +641,12 @@ ggplot(people,aes(x = indegree, y = grade))+
 ```
 ### Gender
 
+This section hosts t-tests and variance tests which try to identify differences in terms of mean and variance of two different groups, i.e. males and females. Both these tests were lead on in-degree and out-degree.
+
+However, no significant p-value was obtained from these tests. This means that gender is not a discriminant in the bullying behaviour inside the class. 
+
 ```{r}
-########################
-# Significance test also on ethnicity and gender
-########################
+# Mean and variance on gender
 attr$indegree = indegree
 attr$outdegree = outdegree
 
@@ -663,7 +670,28 @@ var.test(filter(attr,Gender==0)$outdegree,
 
 ### Ethnicity
 
+For completeness, some tests are run for ethnicity too. Since there are three groups of ethnicity amongst students, ANOVA tests are used to indaguate about pairwise differences. As `TukeyHSD` shows, the p-values is not significant, therefore ethnicity is not discriminant for bullying or being bullied. 
+```{r}
+# Being bullied and ethnicity
+res.aov <- aov(indegree ~ as.factor(Ethnicity), data = attr)
+summary(res.aov)
+TukeyHSD(res.aov)
 
+# Bullying and ethnicity
+res.aov <- aov(outdegree ~ as.factor(Ethnicity), data = attr)
+summary(res.aov)
+TukeyHSD(res.aov)
+```
+
+For confirming the relationship between grade and bullying/being bullied, the same test is applied, showing a low p-value and therefore a discriminant factor for the studied network. In particular, the pairwise test shows couples of grades where there is a substantial difference in terms of bullying/being bullied (i.e. 8 and 3 grades tend to be inside the mechanism of bullying, while 4 and 3 don't).
+
+```{r}
+res.aov <- aov(indegree ~ as.factor(Grade), data = attr)
+summary(res.aov)
+TukeyHSD(res.aov)
+```
+
+The significance of grade will be demonstrated in the following section through the permutation based approach. 
 
 ### Permutation-based approach
 
@@ -674,7 +702,7 @@ var.test(filter(attr,Gender==0)$outdegree,
 
 A permutation-based test (also called re-randomization test) is a type of statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points.
 
-In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the $\rho$-value indicates that, after 1,000 permutations, the correlation is more statistically significant than by chance. 
+In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a Gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the $\rho$-value indicates that, after 1,000 permutations, the correlation is more statistically significant than by chance. 
 
 ```{r}
 set.seed(21)
