@@ -876,13 +876,21 @@ $$
 
 Concerning the edgewise or tie or arc-based reciprocity, i.e. the proportion of edges that are reciprocated, we get a reciprocity index of `r sna::grecip(net, measure="edgewise")` and thus indicating the lack of mutual edges, albeit not their absence.
 
-Considering instead the dyadic measure for reciprocity, we obtain the proportion of mutual and null edges over the total (i.e. mutual, asymmetrical and null), getting a `r sna::grecip(net, measure="dyadic")` reciprocity score. 
+Considering instead the dyadic measure for reciprocity, we obtain the proportion of mutual and null edges over the total (i.e. mutual $M$, asymmetrical $A$ and null edges $N$), getting a `r sna::grecip(net, measure="dyadic")` reciprocity score:
+
+$$
+Reciprocity_{\text{dyadic}} = \frac{M+N}{M+N+A} 
+$$
 
 ```{r}
 sna::grecip(net, measure="dyadic")
 ```
 
-By removing null edges, the index falls to `r sna::grecip(net, measure="dyadic.nonnull")`, indicating that over the 5% of edges is mutual and therefore that over 5% of students bully each other mutually.
+By removing null edges, the index falls to `r sna::grecip(net, measure="dyadic.nonnull")`, indicating that over the 5% of edges is mutual and therefore that over 5% of students bully each other mutually:
+
+$$
+Reciprocity_{\text{dyadic non null}} = \frac{M+N}{M+N+A} 
+$$
 
 ```{r}
 sna::grecip(net, measure="dyadic.nonnull")
