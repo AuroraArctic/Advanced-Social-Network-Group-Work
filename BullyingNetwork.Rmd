@@ -16,7 +16,7 @@ knitr::opts_chunk$set(dpi=400,fig.width=7)
 
 ## Data Structure
 
-The original dataset `bullying_network.xlsx` is an Excel file that contains two sheets about bullying within a group of 25 students in an Italian school class: the first one contains three attributes per student; the second one represents the adjacency matrix of a directed network depicting who bullies whom among the students. 
+The original dataset `bullying_network.xlsx` is an Excel file that contains two sheets about bullying within a group of 25 students in an Italian school class: the first one encloses three attributes per student; the second one represents the adjacency matrix of a directed network depicting who bullies whom among the students. 
 
 The first sheet, the attributes one, contains:
 
@@ -26,7 +26,7 @@ The first sheet, the attributes one, contains:
 
 ## Data pre-processing
 
-As forehead described, the original Excel file contains two sheets. To retrieve the information there stored, a first approach exploited the `read_excel(path, sheet)` function and saved the two sheets in different variables. Since this attempt implied a network misreading of 0s and 1s as characters instead of double and creating an undirected graph, we opted for another importing action: the original Excel file has been manually split into two separate csv files:
+As forehead described, the original Excel file contains two sheets. To retrieve information there stored, a first approach exploited the `read_excel(path, sheet)` function and saved the two sheets in different variables. Since this attempt implied a network misreading of 0s and 1s as characters instead of double and creating an undirected graph, we opted for another importing action: the original Excel file has been separated manually into two different csv files:
 
 - `bullying_attributes.csv`: containing the attributes of students inside the network;
 - `bullying_network.csv`: containing the actual adjacency matrix (i.e. the network).
@@ -65,7 +65,7 @@ By inspecting the obtained network through `summary(net)`, we may notice:
 - that the network is directed;
 - that no hyperedges, loops or multiple edges are allowed;
 - that there are overall 76 directed edges;
-- that the density is 0.1266667, which will be the focus of the centralisation section;
+- that the density is 0.1266667;
 - that nodes are labeled with names, namely the students’ first names.
 
 ### Import attributes
@@ -98,11 +98,11 @@ attr = read.csv("bullying_attributes.csv")
 par(mar=c(0,0,0,0)) # Margin deletion
 gplot(net,
       gmode="digraph",    # directed network
-			mode="fruchtermanreingold", # set mode as Fruchterman-Reingold
+      mode="fruchtermanreingold", # set mode as Fruchterman-Reingold
       jitter=F,           # do not allow nodes to be "jittered"
       edge.col="grey70",  # set color of ties
       vertex.col="cornflowerblue",   # set color of nodes
-			vertex.sides = 100,
+      vertex.sides = 100,
       displaylabels=T,    # indicate that labels should be included
       label.pos=1,        # indicate that labels should be given below points
       label.cex=.7,       # indicate the size of the labels (1 is default)
@@ -156,11 +156,11 @@ gplot(net,
       arrowhead.cex = 0.5) # Size of the arrows head
 ```
 
-In this representation, both gender and ethnicity are evident, while the grade is not accurately represented by the size. In this last case, the logarithm has been applied to the grade attribute in order to represent nodes properly and scale them, but still without being able to distinguish the difference in terms of grades.
+In this representation, both gender and ethnicity are evident, while the grade is not accurately represented by the size. In this last case, a size vector has been created, so that the size of nodes is proportional to their grade, but still without being able to distinguish the precise difference in terms of grades.
 
 In the following chunk, a legend is added to guide the user in the reading of the network:
 
-- ethnicity, through colours, represents 1st and2nd generation of immigrants, plus the Italians;
+- ethnicity, through colours, represents 1st and 2nd generation of immigrants, plus the Italians;
 - shapes map the gender of students: circles for males and squares for females;
 - grades vary in terms of size, whose proportion is depicted in the legend, despite is not exactly the same represented in the network.
 
@@ -205,15 +205,15 @@ legend("topleft",
 
 A second approach is to represent attributes as such:
 
-- shape: ethnicity (i.e. first-generation as triangles, second-generation as squares and Italians as circles);
-- hue: gender (i.e. females as red, males as green);
-- colour lightness: grade (the darker the higher, the lighter the lower).
+- **shape**: ethnicity (i.e. first-generation as triangles, second-generation as squares and Italians as circles);
+- **hue**: gender (i.e. females as red, males as green);
+- **colour lightness**: grade (the darker the higher, the lighter the lower).
 
 ```{r}
-colours_2 = c('#fff0f3', '#ffccd5', '#ffb3c1', '#ff8fa3', '#ff758f', 
-           '#ff4d6d', '#c9184a', '#a4133c', '#800f2f', '#590d22',
-           "#d8f3dc","#b7e4c7","#95d5b2","#74c69d","#52b788",
-           "#40916c", "#2d6a4f","#245741","#1b4332","#081c15"
+colours_2 = c('#fff0f3', '#ffccd5', '#ffb3c1', '#ff8fa3', '#ff758f', # Reds
+              '#ff4d6d', '#c9184a', '#a4133c', '#800f2f', '#590d22', # Reds
+              "#d8f3dc","#b7e4c7","#95d5b2","#74c69d","#52b788",     # Greens
+              "#40916c", "#2d6a4f","#245741","#1b4332","#081c15"     # Greens
 )
 
 shapes = c(3,4,50)
@@ -230,9 +230,9 @@ gplot(net,
       arrowhead.cex = 0.5)
 ```
 
-Despite ethnicity is not so evident as before, in this case, gender is discernible through the hue of nodes and grade through the use of lightness in the choice of colours. In fact, darker colours indicate higher grades and the difference is perceptible with respect to the previous case where size was used. 
+Despite ethnicity is not so evident as before, in this case, the gender is discernible through the hue of nodes, while the grade through the use of lightness in the choice of colours. In fact, darker colours indicate higher grades and the difference is perceptible to the previous case where size was used. 
 
-Notice that the application of size variation with respect to gender or ethnicity may unconsciously suggest a social superiority of one of the categories, which does not exist. Moreover, colours and shapes are sufficient to represent categorical variables with less than 3 values.
+Notice that the application of size variation concerning gender or ethnicity may unconsciously suggest a social superiority of one of the categories, which does not exist. Moreover, colours and shapes are sufficient to represent categorical variables with less than 3 values.
 
 In this case, the legend shows:
 
@@ -298,11 +298,11 @@ gradientLegend(valRange=c(0,10),
 
 ### Third interactive version
 
-This third version of the network exploits `visNetwork` to build an interactive visualization of the class, reproducing the first version aforehead proposed, where:
+This third version of the network exploits `visNetwork` to build an interactive visualization of the class, reproducing the first version forehead proposed, where:
 
 - shapes indicate the gender (i.e. females as circles, males as squares);
 - colours indicate the ethnicity, as shown in the legend;
-- the size is handled on the basis of the grade of the single student.
+- the size is handled based on the grade of the single student.
 
 Moreover, ethnicity can be chosen through the selection above the plot.
 
@@ -357,7 +357,7 @@ visNetwork(nodes = new_net$nodes,
 
 **Degree centrality** is defined as the number of links incident upon a node. Having a directed network implies splitting the degree into in-degree and out-degree. The former counts the number of incoming edges to a node, while the latter refers to the number of edges a node directs to others^[Freeman, L. C. (1978), Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.]. 
 
-When edges express positive aspects (e.g., friendship, collaboration), in degree can be interpreted as a form of popularity and out degree as gregariousness. However, a reversed scenario is presented here due to the edges' negative connotation, i.e. bullying.
+When edges express positive aspects (e.g., friendship, collaboration), in-degree can be interpreted as a form of popularity and out-degree as gregariousness. However, a reversed scenario is presented here due to the edges' negative connotation, i.e. bullying.
 
 ## In-degree
 
@@ -390,9 +390,9 @@ attr$indegree = indegree
 attr$outdegree = outdegree
 ```
 
-In order to properly present the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (i.e. sum of both in and out-degree). 
+To properly present the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (i.e. the sum of both in and out-degree). 
 
-```{r}
+```{r echo=FALSE}
 tile_colors = c("#B78FB5", # lilac
                 "#25D0BC", # green
                 "#71A2C1")
@@ -426,7 +426,13 @@ people %>%
                                                 style = x ~ style(color = ifelse(x == "Yes", tile_colors[1], tile_colors[2])))))
 ```
 
-```{r}
+By taking into consideration the in-degree centrality, Sara can be defined as the most central node, followed by Gianna and Marco. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in degree measure refers to the number of bullies a node must face. Consequently, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375\%$ of the other nodes (normalization obtained by $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$, with $n$ number of nodes). 
+
+In the worst-case scenario, Sara would be bullied by 24 students and she would be the only victim. However, despite her seeming far from the depicted scenario, her in-degree looks extremely high considering the average and the median in the degree of the entire network. The same happens for students like Gianna, Marco, Andrea, Mario and Valentina. 
+
+It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.
+
+```{r echo=FALSE}
 results = data.frame(Measures = c("Most central node", 
                                   "Max in degree",
                                   "(Theoretical) max in degree",
@@ -449,11 +455,10 @@ formattable(results,
             align = c("l","l"))
 ```
 
-
 The average is strongly impacted by the unbalanced situation within the network, meaning a group of seven highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. 
 
 
-```{r warning=FALSE}
+```{r echo=FALSE, warning=FALSE}
 # In-degree distribution among nodes
 ggplot(people)+
     geom_histogram(aes(x=indegree), stat="count", fill="#B78FB3")+
@@ -462,16 +467,9 @@ ggplot(people)+
     theme_minimal()
 ```
 
+Note that the following plot's nodes size indicates whether the in-degree is above the average (bigger) or not (smaller).
 
-By taking into consideration the in-degree centrality, Sara can be defined as the most central node, followed by Gianna and Marco. As stated above, whereas in several cases having many incoming edges represents an advantageous condition for the individual, this specific network emphasizes an unfavourable status. Thus, in degree measure refers to the number of bullies a node must face. Consequently, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375\%$ of the other nodes (normalization obtained by $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$, with $n$ number of nodes). 
-
-In the worst case scenario, Sara would be bullied by 24 students and she would be the only victim. However, despite her seeming far from the depicted scenario, her in-degree looks extremely high considering the average and the median in the degree of the entire network. The same happens for students like Gianna, Marco, Andrea, Mario and Valentina. 
-
-It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.
-
-Note that the following plot's nodes size indicates whether the indegree
-
-```{r}
+```{r echo=FALSE}
 # Setting colours, shapes, sizes, ethnicity, gender, title
 V(i_net)$color = colours_1[attr$Ethnicity]
 V(i_net)$shape = c("dot","square")[attr$Gender+1]
@@ -495,7 +493,10 @@ visNetwork(nodes = new_net$nodes,
            physics = T) %>%
     visEdges(arrows = "to") %>%
     visOptions(highlightNearest = TRUE) %>%
-    visIgraphLayout(layout = "layout.fruchterman.reingold")
+    visIgraphLayout(layout = "layout.fruchterman.reingold") %>%
+    visInteraction(dragNodes = FALSE, 
+                   dragView = FALSE, 
+                   zoomView = FALSE)
 ```
 
 ## Outdegree
@@ -514,9 +515,9 @@ visNetwork(nodes = new_net$nodes,
 </aside>
 
 
-There is no unique central node in the case of the out degree measure. Thus, Angela, Aurora, and Francesco can be detected as the three most central nodes (as shown in the network below). It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below.
+There is no unique central node in the case of the out-degree measure. Thus, Angela, Aurora, and Francesco can be detected as the three most central nodes (as shown in the network below). It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below.
 
-```{r}
+```{r echo=FALSE}
 # Normalized outdegree
 people$`Normalized Out degree` = round(people$`Out degree`/nodes, 3)
 
@@ -543,7 +544,7 @@ people %>%
 ```
 
 
-```{r}
+```{r echo=FALSE}
 results = data.frame(Measures = c("Most central node", 
                                   "Max out degree",
                                   "(Theoretical) max out degree",
@@ -566,7 +567,7 @@ formattable(results,
             align = c("l","l"))
 ```
 
-Each of the three central out degree nodes bullies almost one-third of the overall network: 
+Each of the three central out-degree nodes bullies almost one-third of the overall network: 
 
 $$
 \left[ \frac{outdegree}{n-1} = \frac{7}{24} = 0.291 \approx 0.29 \approx 1/3\right]
@@ -574,7 +575,7 @@ $$
 
 These values are high above the average of `r avg_outdegree` $\pm$ `r round(sd(people[,"Out degree"]),2)` but do reach extreme cases, such as a centralized network (i.e., maximum out-degree). Therefore, a visual interpretation of the out-degree distribution in a bar plot graph may help understand the underlying reasons for low reference points.    
 
-```{r}
+```{r echo=FALSE}
 ggplot(people)+
     geom_bar(aes(x=reorder(`Name`,`Out degree`),y=`Out degree`), 
              stat='identity',
@@ -589,7 +590,7 @@ ggplot(people)+
 
 Once again, the out-degree measure shows an imbalanced situation assessing a significant gap between the lowest extreme cases, such as 0, and the highest ones. The imbalance is determined by the three central nodes that become the primary senders of bullying acts. 
 
-```{r}
+```{r echo=FALSE}
 # Setting colours, shapes, sizes, ethnicity, gender, title
 V(i_net)$color = colours_1[attr$Ethnicity]
 V(i_net)$shape = c("dot","square")[attr$Gender+1]
@@ -613,13 +614,15 @@ visNetwork(nodes = new_net$nodes,
            physics = T) %>%
     visEdges(arrows = "to") %>%
     visOptions(highlightNearest = TRUE) %>%
-    visIgraphLayout(layout = "layout.fruchterman.reingold")
+    visIgraphLayout(layout = "layout.fruchterman.reingold") %>%
+    visInteraction(dragView = FALSE, 
+                   zoomView = FALSE)
 ```
 
 ## Correlations
 
 <aside>
-💡 *Let's assume we hypothesize that the grade of students might be impacted by how many others they are being bullied by. Calculate the correlation between the in degree and the grade of the kid.*
+💡 *Let's assume we hypothesize that the grade of students might be impacted by how many others they are being bullied by. Calculate the correlation between the in-degree and the grade of the kid.*
 
 -   *What is the correlation value?*
 -   *What does it mean substantively?*
@@ -638,7 +641,7 @@ The Pearson coefficient on in-degree and grade, namely the correlation coefficie
 cor.test(indegree,grade)
 ```
 
-Moreover, the correlation test shows a low p-values, indicating a statistically significant relationship between the number of people that bullies a kid and the grade he/she gets. 
+Moreover, the correlation test shows a low p-value, indicating a statistically significant relationship between the number of people that bully a kid and the grade he/she gets. 
 
 ```{r message=FALSE, warning=FALSE}
 # Linear relationship between in degree and grade
@@ -653,10 +656,9 @@ ggplot(people,aes(x = indegree, y = grade))+
 
 This section hosts t-tests and variance tests which try to identify differences in terms of mean and variance of two different groups, i.e. males and females. Both these tests were lead on in-degree and out-degree.
 
-However, no significant p-value was obtained from these tests. This means that gender is not a discriminant in the bullying behaviour inside the class. 
+However, no significant p-value was obtained from these tests. This means that gender is not discriminant in the bullying behaviour inside the class. 
 
 ```{r}
-# GENDER SIGNIFICANCE TEST
 # Mean difference between males and females (in degree)
 t.test(filter(attr,Gender==0)$indegree,
        filter(attr,Gender==1)$indegree)
@@ -676,7 +678,7 @@ var.test(filter(attr,Gender==0)$outdegree,
 
 ### Ethnicity
 
-For completeness, some tests are run for ethnicity too. Since there are three groups of ethnicity amongst students, ANOVA tests are used to indaguate about pairwise differences. As `TukeyHSD` shows, the p-values is not significant, therefore ethnicity is not discriminant for bullying or being bullied. 
+For completeness, some tests are run for ethnicity too. Since there are three groups of ethnicity amongst students, ANOVA tests are used to indagate pairwise differences. As `TukeyHSD` shows, the p-value is not significant, therefore ethnicity is not discriminant for bullying or being bullied. 
 ```{r}
 # Being bullied and ethnicity
 res.aov <- aov(indegree ~ as.factor(Ethnicity), data = attr)
@@ -697,7 +699,7 @@ summary(res.aov)
 TukeyHSD(res.aov)
 ```
 
-The significance of grade will be demonstrated in the following section through the permutation based approach. 
+The significance of the grade will be demonstrated in the following section through the permutation-based approach. 
 
 ### Permutation-based approach
 
@@ -708,7 +710,7 @@ The significance of grade will be demonstrated in the following section through 
 
 A permutation-based test (also called re-randomization test) is a type of statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points.
 
-In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a Gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the $\rho$-value indicates that, after 1,000 permutations, the correlation is more statistically significant than by chance. 
+In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a Gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the p-value indicates that, after 1,000 permutations, the correlation is more statistically significant than by chance. 
 
 ```{r}
 set.seed(21)
@@ -749,7 +751,7 @@ text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade),
     
 💡 *What do you conclude substantively (taking into account that the network is "who do you bully?")?*
 
-💡 *Make sure to discuss the reference points for the measure. What is the minimum and maximum value?*
+💡 *Make sure to discuss the reference points for the measure. What are the minimum and maximum values?*
 
 </aside>
 
@@ -760,7 +762,7 @@ In an undirected network, centralization is computed as follows:
 $$
 Centralization = \frac{\sum (\max-degree_i)}{(n-1)(n-2)}
 $$
-The most centralized network is the one that has a single node in the center, which that links every other node in the network. In this case the maximum degree is $(n-1)$, therefore the centralization index is:
+The most centralized network is the one that has a single node in the centre, which that links every other node in the network. In this case, the maximum degree is $(n-1)$, therefore the centralization index is:
 
 $$
 C = \frac{(24-1)*24+(24-24)*1}{24*23} = \frac{23*24}{23*24} = 1
@@ -775,9 +777,10 @@ $$
 # Total degree centralization
 sna::centralization(net,sna::degree)
 ```
-In the studied network, the centralization index is $0.111413$, which indicates a fairly decentralized network. 
 
-Since the bullying network is directed, it is possible to distinguish the centralization index into in degree and out degree. As the table shows, the in degree is higher than the out degree centralization index, indicating a more centralized bullied network (i.e. a few of them are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others). Notice that both these indexes are higher than the previous centralization index, indicating two more centralized networks if separated than if joined in an undirected one. 
+In the studied network, the centralization index is `r `sna::centralization(net,sna::degree)`, which indicates a fairly decentralized network. 
+
+Since the bullying network is directed, it is possible to distinguish the centralization index into in-degree and out-degree. As the table shows, the in-degree is higher than the out-degree centralization index, indicating a more centralized bullied network (i.e. a few of them are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others). Notice that both these indexes are higher than the previous centralization index, indicating two more centralized networks if separated than if joined in an undirected one. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 table = formattable(data.frame(
@@ -791,7 +794,7 @@ names(table) = c("Centralization Index", "In degree Centralization Index", "Out 
 table
 ```
 
-Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in terms of centralization index, the computed ones are closer to the minimal reference point than the maximal, leading to the conclusion of a decentralized network. 
+Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in terms of the centralization index, the computed ones are closer to the minimal reference point than the maximal, leading to the conclusion of a decentralized network. 
 
 ## Reciprocity
 
@@ -810,11 +813,12 @@ Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in te
 
 </aside>
 
+Let’s start with a census about dyads, which will return how many mutual, asymmetric and null dyads there are in the network. 
 ```{r}
 sna::dyad.census(net)
 ```
 
-Let’s start with a census about dyads, which will return how many mutual, asymmetric and null dyads there are in the network. Given $25$ nodes, the maximal number of edges is $(25*24)/2 = 300$, while the minimal is $0$. According to the census, there are:
+Given $25$ nodes, the maximal number of edges is $(25*24)/2 = 300$, while the minimal is $0$. According to the census, there are:
 
 * 4 mutual edges: Francesco - Andrea, Flavio - Giulia, Angelo - Giulia and Marco - Sara. By looking at their degree centrality, we can notice that:
 
@@ -824,12 +828,17 @@ Let’s start with a census about dyads, which will return how many mutual, asym
 ```{r}
 # Mutual edges
 E(i_net)[which_mutual(i_net)]
+```
 
+
+```{r}
 # Degree Centrality of nodes with mutual links
 people %>%
-  filter(Name %in% c("Francesco", "Andrea", 
-                     "Flavio", "Marco", 
-                     "Giulia", "Sara", "Angelo"))
+    select(-`Above Average`) %>%
+    filter(Name %in% c("Francesco", "Andrea", 
+                       "Flavio", "Marco", 
+                       "Giulia", "Sara", "Angelo")) %>%
+    formattable()
 ```
     
 * 68 asymmetrical edges;
@@ -857,15 +866,15 @@ $$
 Reciprocity_{max} = \frac{2*M}{2*M+A} = \frac{2*M}{2*M}=1
 $$
 
-With respect to the edgewise or tie or arc-based reciprocity, i.e. the proportion of edges that are reciprocated, we get a reciprocity index of $0.1052632$ and thus indicating the lack of mutual edges, albeit not their absence.
+Concerning the edgewise or tie or arc-based reciprocity, i.e. the proportion of edges that are reciprocated, we get a reciprocity index of `r `sna::grecip(net, measure="edgewise")` and thus indicating the lack of mutual edges, albeit not their absence.
 
-Considering instead the dyadic measure for reciprocity, we obtain the proportion of mutual and null edges over the total (i.e. mutual, asymmetrical and null), getting a $0.733$ reciprocity score. 
+Considering instead the dyadic measure for reciprocity, we obtain the proportion of mutual and null edges over the total (i.e. mutual, asymmetrical and null), getting a `r sna::grecip(net, measure="dyadic")` reciprocity score. 
 
 ```{r}
 sna::grecip(net, measure="dyadic")
 ```
 
-By removing null edges, the index falls to $0.05555556$, indicating that over the 5% of edges is mutual and therefore that over 5% of students bully each other mutually.
+By removing null edges, the index falls to `r sna::grecip(net, measure="dyadic.nonnull")`, indicating that over the 5% of edges is mutual and therefore that over 5% of students bully each other mutually.
 
 ```{r}
 sna::grecip(net, measure="dyadic.nonnull")
