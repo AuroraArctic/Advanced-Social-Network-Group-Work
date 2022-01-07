@@ -1,8 +1,10 @@
 ---
 title: "Bullying Network"
 author: "Aurora Maria Tumminello, Lucia Hrovatin"
-output: 
-  html_notebook: 
+output:
+  pdf_document:
+    toc: yes
+  html_notebook:
     toc: yes
     highlight: pygments
     theme: paper
@@ -619,7 +621,7 @@ visNetwork(nodes = new_net$nodes,
 ## Correlations
 
 <aside>
-💡 *Let's assume we hypothesize that the grade of students might be impacted by how many others they are being bullied by. Calculate the correlation between the in degree and the grade of the kid.*
+💡 *Let's assume we hypothesize that the grade of students might be impacted by how many others they are being bullied by. Calculate the correlation between the indegree and the grade of the kid.*
 
 -   *What is the correlation value?*
 -   *What does it mean substantively?*
@@ -632,6 +634,7 @@ grade = attr$Grade
 cor_value = cor(indegree, grade, method = c("pearson"))
 cor_value
 ```
+
 The Pearson coefficient on in-degree and grade, namely the correlation coefficient, is slightly above 0.85. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., in-degree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
 
 ```{r}
@@ -676,7 +679,8 @@ var.test(filter(attr,Gender==0)$outdegree,
 
 ### Ethnicity
 
-For completeness, some tests are run for ethnicity too. Since there are three groups of ethnicity amongst students, ANOVA tests are used to indaguate about pairwise differences. As `TukeyHSD` shows, the p-values is not significant, therefore ethnicity is not discriminant for bullying or being bullied. 
+For completeness, some tests are run for ethnicity too. Since there are three groups of ethnicity among students, ANOVA tests are used to investigate about pairwise differences. As `TukeyHSD` shows, the p-values is not significant, therefore ethnicity is not discriminant for bullying or being bullied. 
+
 ```{r}
 # Being bullied and ethnicity
 res.aov <- aov(indegree ~ as.factor(Ethnicity), data = attr)
@@ -708,7 +712,7 @@ The significance of grade will be demonstrated in the following section through 
 
 A permutation-based test (also called re-randomization test) is a type of statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points.
 
-In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a Gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the $\rho$-value indicates that, after 1,000 permutations, the correlation is more statistically significant than by chance. 
+In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a Gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the $\rho$-value indicates that, after $1000$ permutations, the correlation is more statistically significant than by chance. 
 
 ```{r}
 set.seed(21)
@@ -763,12 +767,12 @@ $$
 The most centralized network is the one that has a single node in the center, which that links every other node in the network. In this case the maximum degree is $(n-1)$, therefore the centralization index is:
 
 $$
-C = \frac{(24-1)*24+(24-24)*1}{24*23} = \frac{23*24}{23*24} = 1
+C = \frac{(24-1) \cdot 24+(24-24)\cdot1}{24\cdot23} = \frac{23\cdot24}{23\cdot24} = 1
 $$
 while in the opposite case, in a decentralized network where every node is linked to everybody else, the centralization index is:
 
 $$
-C = \frac{(24-24)*25}{24*23} = \frac{0}{23*24} = 0
+C = \frac{(24-24)\cdot25}{24\cdot23} = \frac{0}{23\cdot24} = 0
 $$
 
 ```{r}
@@ -777,7 +781,9 @@ sna::centralization(net,sna::degree)
 ```
 In the studied network, the centralization index is $0.111413$, which indicates a fairly decentralized network. 
 
-Since the bullying network is directed, it is possible to distinguish the centralization index into in degree and out degree. As the table shows, the in degree is higher than the out degree centralization index, indicating a more centralized bullied network (i.e. a few of them are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others). Notice that both these indexes are higher than the previous centralization index, indicating two more centralized networks if separated than if joined in an undirected one. 
+Since the bullying network is directed, it is possible to distinguish the centralization index into in degree and out degree. As the table shows, the in degree is higher than the out degree centralization index, indicating a more centralized bullied network (i.e. few kids are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others).
+
+Notice that both indexes are higher than the previous centralization index ($0.11$), suggesting the presence of two more centralized sub-networks. 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 table = formattable(data.frame(
@@ -814,12 +820,12 @@ Considering the maximal (i.e. $1$) and minimal (i.e. $0$) values reachable in te
 sna::dyad.census(net)
 ```
 
-Let’s start with a census about dyads, which will return how many mutual, asymmetric and null dyads there are in the network. Given $25$ nodes, the maximal number of edges is $(25*24)/2 = 300$, while the minimal is $0$. According to the census, there are:
+Let’s start with a census about dyads, which will return how many mutual, asymmetric and null dyads there are in the network. Given $25$ nodes, the maximal number of edges is $(25 \cdot 24)/2 = 300$, while the minimal is $0$. In this specific network, there are:
 
-* 4 mutual edges: Francesco - Andrea, Flavio - Giulia, Angelo - Giulia and Marco - Sara. By looking at their degree centrality, we can notice that:
+* 4 *mutual* edges: Francesco - Andrea, Flavio - Giulia, Angelo - Giulia and Marco - Sara. By looking at their degree, we can notice that:
 
-    - Flavio and Marco bully just one person per each (i.e. Giulia and Sara) respectively, but their victim, in turn, bully them, creating a cycle of attack and defence;
-    - Giulia appears twice in these mutual edges, which are half her in and out-edges. This could imply her capacity to respond to her bullies by bullying in return.
+    - Flavio and Marco bully just one person per each (i.e. Giulia and Sara) respectively, but their victims, in turn, bully them, creating a cycle of attack and defense;
+    - Giulia appears twice in these mutual edges, which represent half of her in- and out-edges. This might suggest a counterattack technique: responding to the bullies by bullying them.
     
 ```{r}
 # Mutual edges
@@ -832,10 +838,10 @@ people %>%
                      "Giulia", "Sara", "Angelo"))
 ```
     
-* 68 asymmetrical edges;
-* 228 null or missing edges.
+* 68 *asymmetrical* edges;
+* 228 *null* or *missing* edges.
 
-Next, the reciprocity index is computed as the number of mutual dyads in the network over the total amount of possible mutual dyads:
+As further step, the reciprocity index is computed as the number of mutual dyads in the network over the total amount of possible mutual dyads:
 
 $$
 Reciprocity = \frac{2*M}{2*M+A}
