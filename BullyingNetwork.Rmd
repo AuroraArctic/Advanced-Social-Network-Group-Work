@@ -35,6 +35,16 @@ As forehead described, the original Excel file contains two sheets. To retrieve 
 
 ## Libraries
 
+```{r message=FALSE, warning=FALSE, include=FALSE}
+if (!require(tidyverse)) install.packages('tidyverse')
+if (!require(sna)) install.packages('sna')
+if (!require(knitr)) install.packages('knitr')
+if (!require(itsadug)) install.packages('itsadug')
+if (!require(formattable)) install.packages('formattable')
+if (!require(igraph)) install.packages('igraph')
+if (!require(visNetwork)) install.packages('visNetwork')
+```
+
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(sna)
@@ -695,7 +705,6 @@ res.aov <- aov(outdegree ~ as.factor(Ethnicity), data = attr)
 summary(res.aov)
 TukeyHSD(res.aov)
 ```
-
 
 ### Permutation-based approach
 
