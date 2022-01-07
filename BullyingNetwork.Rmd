@@ -469,7 +469,6 @@ formattable(results,
 
 The average is strongly impacted by the unbalanced situation within the network, meaning a group of seven highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. 
 
-
 ```{r echo=FALSE, warning=FALSE}
 # In-degree distribution among nodes
 ggplot(people)+
@@ -648,13 +647,19 @@ cor_value = cor(indegree, grade, method = c("pearson"))
 cor_value
 ```
 
-The Pearson coefficient on in-degree and grade, namely the correlation coefficient, is slightly above 0.85. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., in-degree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
+The Pearson coefficient on in-degree and grade, namely the correlation coefficient, is slightly above `r round(cor_value,2)`. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., in-degree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
 
 ```{r}
 cor.test(indegree,grade)
 ```
 
-Moreover, the correlation test shows a low p-value, indicating a statistically significant relationship between the number of people that bully a kid and the grade he/she gets. 
+Moreover, the correlation test shows a low p-value, indicating a statistically significant relationship between the number of people that bully a kid and the grade he/she gets, illustrated by the following plot. In particular, it shows data points in terms of grade and in-degree and the linear relationship between these variables. 
+
+However, despite the high correlation coefficient, it is worth noticing some fallacies in the model:
+
+1. Low number of students: since our sample is composed of a small number of subjects, this model is not representative for the entire school system bullying mechanism;
+
+2. The line fits the majority of points. Nevertheless, some outliers can be detected from the plot (e.g. (3,9)).
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Linear relationship between in degree and grade
@@ -665,13 +670,19 @@ ggplot(people,aes(x = indegree, y = grade))+
     theme(axis.text.x = element_text(angle =45, hjust=1))+
     labs(title = "Linear relationship between in degree and grade")
 ```
-
-For confirming the relationship between grade and bullying/being bullied, the ANOVA test is applied, showing a low p-value and therefore a discriminant factor for the studied network. In particular, the pairwise test shows couples of grades where there is a substantial difference in terms of bullying/being bullied (i.e. 8 and 3 grades tend to be inside the mechanism of bullying, while 4 and 3 don't).
+For confirming the relationship between grade and being bullied, the ANOVA test is applied, showing a low p-value and therefore a discriminant factor for the studied network. In particular, the pairwise test shows couples of grades where there is a substantial difference in terms of being bullied (i.e. 8 and 3 grades tend to be inside the mechanism of bullying, while 4 and 3 don't).
 
 ```{r}
 res.aov <- aov(indegree ~ as.factor(Grade), data = attr)
 summary(res.aov)
 TukeyHSD(res.aov)
+```
+
+Instead, by focusing on the grade and bullying (i.e. out-degree), the resulted p-value is high and therefore the relationship is not statistically significant. 
+
+```{r}
+res.aov <- aov(outdegree ~ as.factor(Grade), data = attr)
+summary(res.aov)
 ```
 
 ### Gender
@@ -788,7 +799,6 @@ In the studied network, the centralization index is `r sna::centralization(net,s
 Since the bullying network is directed, it is possible to distinguish the centralization index into in degree and out degree. As the table shows, the in degree is higher than the out degree centralization index, indicating a more centralized bullied network (i.e. few kids are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others).
 
 Notice that both indexes are higher than the previous centralization index ($0.11$), suggesting the presence of two more centralized sub-networks. 
-
 
 ```{r message=FALSE, warning=FALSE}
 table = formattable(data.frame(
