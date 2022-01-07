@@ -2,12 +2,12 @@
 title: "Bullying Network"
 author: "Aurora Maria Tumminello, Lucia Hrovatin"
 output:
-  pdf_document:
-    toc: yes
   html_notebook:
     toc: yes
     highlight: pygments
     theme: paper
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -38,8 +38,8 @@ As forehead described, the original Excel file contains two sheets. To retrieve 
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(sna)
-library(itsadug) # For gradient legend
 library(knitr)
+library(itsadug) # For gradient legend
 library(formattable) # For nice tables
 library(igraph)
 library(visNetwork)
@@ -67,7 +67,7 @@ By inspecting the obtained network through `summary(net)`, we may notice:
 - that the network is directed;
 - that no hyperedges, loops or multiple edges are allowed;
 - that there are overall 76 directed edges;
-- that the density is 0.1266667;
+- that the density is `r round(network.density(net),3)`;
 - that nodes are labeled with names, namely the students’ first names.
 
 ### Import attributes
@@ -132,7 +132,7 @@ Once again, let’s consider the three attributes and their respective values:
 - **Ethnicity**: categorical variable assuming three different values (1, 2 or 3);
 - **Grade**: categorical variable assuming 11 different values (from 0 to 10).
 
-These attributes could be mapped in many different ways considering the shape, the colour and the size of nodes. 
+These attributes could be mapped in many different ways considering the shape, the colour and the size of nodes. Below we present three versions of the network. 
 
 ### First version
 
@@ -232,9 +232,9 @@ gplot(net,
       arrowhead.cex = 0.5)
 ```
 
-Despite ethnicity is not so evident as before, in this case, the gender is discernible through the hue of nodes, while the grade through the use of lightness in the choice of colours. In fact, darker colours indicate higher grades and the difference is perceptible to the previous case where size was used. 
+Despite ethnicity is not so evident as before, in this case, the gender is discernible through the hue of nodes, while the grade through the use of lightness in the choice of colours, despite grade is a discrete variable described by a continuous gradient. In fact, darker colours indicate higher grades and the difference is perceptible to the previous case where size was used. 
 
-Notice that the application of size variation concerning gender or ethnicity may unconsciously suggest a social superiority of one of the categories, which does not exist. Moreover, colours and shapes are sufficient to represent categorical variables with less than 3 values.
+Notice that the application of size variation concerning gender or ethnicity may unconsciously suggest a social superiority of one of the categories, which does not exist. Moreover, colours and shapes are sufficient to represent categorical variables with less than 3 values, therefore size was not considered.
 
 In this case, the legend shows:
 
@@ -413,7 +413,7 @@ people$`Normalized In degree` = round(people$`In degree`/nodes,2)
 avg_indegree = mean(people$`In degree`)
 median_indegree = median(people$`In degree`)
 
-people$`Above Average` =  ifelse(indegree<=avg_indegree, "No", "Yes")
+people$`Above Average (In degree)` =  ifelse(indegree<=avg_indegree, "No", "Yes")
     
 people %>%
     arrange(desc(indegree)) %>%
@@ -475,7 +475,7 @@ Note that the following plot's nodes size indicates whether the in-degree is abo
 # Setting colours, shapes, sizes, ethnicity, gender, title
 V(i_net)$color = colours_1[attr$Ethnicity]
 V(i_net)$shape = c("dot","square")[attr$Gender+1]
-V(i_net)$size = ifelse(people$`Above Average`== "Yes",30,10)
+V(i_net)$size = ifelse(people$`Above Average (In degree)`== "Yes",30,10)
 V(i_net)$ethnicity = ifelse(attr$Ethnicity==3, "Italian",
                             ifelse(attr$Ethnicity == 1,"1st immigrant", "2nd immigrant"))
 V(i_net)$gender = ifelse(attr$Gender == 0, "Female","Male")
@@ -527,11 +527,11 @@ people$`Normalized Out degree` = round(people$`Out degree`/nodes, 3)
 avg_outdegree = mean(people$`Out degree`)
 median_outdegree = median(sort(people$`Out degree`))
 
-people$`Above Average` =  ifelse(outdegree<=avg_outdegree, "No", "Yes")
+people$`Above Average (Out degree)` =  ifelse(outdegree<=avg_outdegree, "No", "Yes")
 
 people %>%
     select(Name, `Out degree`,`In degree`,
-           Degree, `Normalized Out degree`, `Above Average`) %>%
+           Degree, `Normalized Out degree`, `Above Average (Out degree)`) %>%
     arrange(desc(outdegree)) %>%
     formattable(align = c("l",rep("c",5)),
                 list(
@@ -541,7 +541,7 @@ people %>%
                     'Out degree' = color_tile("transparent",  tile_colors[2]),
                     'Degree' = color_tile("transparent",  tile_colors[1]),
                     'Normalized Out degree' = color_tile("transparent",  tile_colors[2]),
-                    'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
+                    'Above Average  (Out degree)' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
                                                 style = x ~ style(color = ifelse(x == "Yes",  tile_colors[2],  tile_colors[1])))))
 ```
 
@@ -596,7 +596,7 @@ Once again, the out-degree measure shows an imbalanced situation assessing a sig
 # Setting colours, shapes, sizes, ethnicity, gender, title
 V(i_net)$color = colours_1[attr$Ethnicity]
 V(i_net)$shape = c("dot","square")[attr$Gender+1]
-V(i_net)$size = ifelse(people$`Above Average`== "Yes",30,10)
+V(i_net)$size = ifelse(people$`Above Average  (Out degree)`== "Yes",30,10)
 V(i_net)$ethnicity = ifelse(attr$Ethnicity==3, "Italian",
                             ifelse(attr$Ethnicity == 1,"1st immigrant", "2nd immigrant"))
 V(i_net)$gender = ifelse(attr$Gender == 0, "Female","Male")
@@ -646,7 +646,7 @@ cor.test(indegree,grade)
 
 Moreover, the correlation test shows a low p-value, indicating a statistically significant relationship between the number of people that bully a kid and the grade he/she gets. 
 
-```{r message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Linear relationship between in degree and grade
 ggplot(people,aes(x = indegree, y = grade))+
     stat_smooth(method = "lm", color = "#1FAD9D", fill = "#A8F0E9")+
@@ -655,9 +655,18 @@ ggplot(people,aes(x = indegree, y = grade))+
     theme(axis.text.x = element_text(angle =45, hjust=1))+
     labs(title = "Linear relationship between in degree and grade")
 ```
+
+For confirming the relationship between grade and bullying/being bullied, the ANOVA test is applied, showing a low p-value and therefore a discriminant factor for the studied network. In particular, the pairwise test shows couples of grades where there is a substantial difference in terms of bullying/being bullied (i.e. 8 and 3 grades tend to be inside the mechanism of bullying, while 4 and 3 don't).
+
+```{r}
+res.aov <- aov(indegree ~ as.factor(Grade), data = attr)
+summary(res.aov)
+TukeyHSD(res.aov)
+```
+
 ### Gender
 
-This section hosts t-tests and variance tests which try to identify differences in terms of mean and variance of two different groups, i.e. males and females. Both these tests were lead on in-degree and out-degree.
+This section hosts t-tests which try to identify differences in terms of mean of two different groups, i.e. males and females. These tests were lead on in-degree and out-degree.
 
 However, no significant p-value was obtained from these tests. This means that gender is not discriminant in the bullying behaviour inside the class. 
 
@@ -668,14 +677,6 @@ t.test(filter(attr,Gender==0)$indegree,
 
 # Mean difference between males and females (out degree)
 t.test(filter(attr,Gender==0)$outdegree,
-       filter(attr,Gender==1)$outdegree)
-
-# Mean difference between males and females (in degree)
-var.test(filter(attr,Gender==0)$indegree,
-       filter(attr,Gender==1)$indegree)
-
-# Mean difference between males and females (out degree)
-var.test(filter(attr,Gender==0)$outdegree,
        filter(attr,Gender==1)$outdegree)
 ```
 
@@ -695,15 +696,6 @@ summary(res.aov)
 TukeyHSD(res.aov)
 ```
 
-For confirming the relationship between grade and bullying/being bullied, the same test is applied, showing a low p-value and therefore a discriminant factor for the studied network. In particular, the pairwise test shows couples of grades where there is a substantial difference in terms of bullying/being bullied (i.e. 8 and 3 grades tend to be inside the mechanism of bullying, while 4 and 3 don't).
-
-```{r}
-res.aov <- aov(indegree ~ as.factor(Grade), data = attr)
-summary(res.aov)
-TukeyHSD(res.aov)
-```
-
-The significance of the grade will be demonstrated in the following section through the permutation-based approach. 
 
 ### Permutation-based approach
 
@@ -737,7 +729,7 @@ x <- seq(min(permutation), max(permutation))
 curve(dnorm(x, mean=mean(permutation), sd=sd(permutation)), 
       col="#7C5079", lwd=2, add=TRUE)
 text(x = 0.56, y = cor(indegree, grade), 
-     expression(paste("N~(", mu, "= 0.0, ", omega, "= 0.2)")), col = "#3E283D")
+     expression(paste("N~(", mu, "= 0.0, ", sigma, "= 0.2)")), col = "#3E283D")
 
 # P-value line
 abline(v=cor(indegree, grade), lwd=2, col="#7C5079")
@@ -782,19 +774,21 @@ $$
 sna::centralization(net,sna::degree)
 ```
 
-In the studied network, the centralization index is `r `sna::centralization(net,sna::degree)`, which indicates a fairly decentralized network. 
+In the studied network, the centralization index is `r sna::centralization(net,sna::degree)`, which indicates a fairly decentralized network. 
 
 Since the bullying network is directed, it is possible to distinguish the centralization index into in degree and out degree. As the table shows, the in degree is higher than the out degree centralization index, indicating a more centralized bullied network (i.e. few kids are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others).
 
 Notice that both indexes are higher than the previous centralization index ($0.11$), suggesting the presence of two more centralized sub-networks. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+# apprfondire
+
+```{r message=FALSE, warning=FALSE}
 table = formattable(data.frame(
-    "Centralization index" = sna::centralization(net,sna::degree),
+    "Centralization index" = round(sna::centralization(net,sna::degree),3),
     # In degree centralization
-    "In degree Centralization Index" = sna::centralization(net,sna::degree, cmode="indegree"),
+    "In degree Centralization Index" = round(sna::centralization(net,sna::degree, cmode="indegree"),3),
     # Out degree centralization
-    "Out degree Centralization Index" = sna::centralization(net,sna::degree, cmode="outdegree")))
+    "Out degree Centralization Index" = round(sna::centralization(net,sna::degree, cmode="outdegree"),3)))
 
 names(table) = c("Centralization Index", "In degree Centralization Index", "Out degree Centralization Index")
 table
@@ -840,7 +834,7 @@ E(i_net)[which_mutual(i_net)]
 ```{r}
 # Degree Centrality of nodes with mutual links
 people %>%
-    select(-`Above Average`) %>%
+    select(-`Above Average(Out degree)`,-`Above Average (In degree)`) %>%
     filter(Name %in% c("Francesco", "Andrea", 
                        "Flavio", "Marco", 
                        "Giulia", "Sara", "Angelo")) %>%
@@ -850,10 +844,10 @@ people %>%
 * 68 *asymmetrical* edges;
 * 228 *null* or *missing* edges.
 
-As further step, the reciprocity index is computed as the number of mutual dyads in the network over the total amount of possible mutual dyads:
+As further step, the reciprocity index is computed as the number of mutual dyads (i.e. $M$) in the network over the total amount of edges, i.e. sum of mutuals ($M$) and asymmetrical edges ($A$):
 
 $$
-Reciprocity = \frac{2*M}{2*M+A}
+Reciprocity = \frac{2\cdot M}{2\cdot M+A}
 $$
 
 ```{r}
@@ -863,16 +857,16 @@ sna::grecip(net, measure="edgewise")
 If there wasn’t any mutual edge, reciprocity would have been 0:
 
 $$
-Reciprocity_{min} = \frac{2*M}{2*M+A} = \frac{2*0}{2*0+A}=0
+Reciprocity_{min} = \frac{2\cdot M}{2\cdot M+A} = \frac{2\cdot 0}{2\cdot 0+A}=0
 $$
 
 If instead all edges were mutual, the highest reachable value would have been 1:
 
 $$
-Reciprocity_{max} = \frac{2*M}{2*M+A} = \frac{2*M}{2*M}=1
+Reciprocity_{max} = \frac{2\cdot M}{2 \cdot M+A} = \frac{2\cdot M}{2\cdot M}=1
 $$
 
-Concerning the edgewise or tie or arc-based reciprocity, i.e. the proportion of edges that are reciprocated, we get a reciprocity index of `r `sna::grecip(net, measure="edgewise")` and thus indicating the lack of mutual edges, albeit not their absence.
+Concerning the edgewise or tie or arc-based reciprocity, i.e. the proportion of edges that are reciprocated, we get a reciprocity index of `r sna::grecip(net, measure="edgewise")` and thus indicating the lack of mutual edges, albeit not their absence.
 
 Considering instead the dyadic measure for reciprocity, we obtain the proportion of mutual and null edges over the total (i.e. mutual, asymmetrical and null), getting a `r sna::grecip(net, measure="dyadic")` reciprocity score. 
 
