@@ -704,9 +704,9 @@ TukeyHSD(res.aov)
 
 </aside>
 
-A permutation-based test (also called re-randomization test) is a type of statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points.
+A **permutation-based test** (also called re-randomization test) is a type of statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points.
 
-In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree. As the histogram shows, after all the permutations, a Gaussian distribution is reached. Moreover, as indicated by the straight vertical line, the $\rho$-value indicates that, after $1000$ permutations, the correlation is more statistically significant than by chance. 
+In the following chunk, this test is performed on 1,000 permutations of the grade over students' in-degree, while computing the Pearson correlation coefficient between them. As the histogram shows, after all the permutations, a Gaussian distribution is reached within the range of values of Pearson coefficient (i.e. $[-1,1]$), since it is likely to find no correlations between random permutations of grade and in-degree than perfect ones. Moreover, as indicated by the straight vertical line, the Pearson coefficient $\rho$ indicates that, after $1000$ permutations, the correlation is more statistically significant than by chance. 
 
 ```{r}
 set.seed(21)
@@ -780,7 +780,6 @@ Since the bullying network is directed, it is possible to distinguish the centra
 
 Notice that both indexes are higher than the previous centralization index ($0.11$), suggesting the presence of two more centralized sub-networks. 
 
-# apprfondire
 
 ```{r message=FALSE, warning=FALSE}
 table = formattable(data.frame(
