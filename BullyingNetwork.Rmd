@@ -729,7 +729,9 @@ TukeyHSD(res.aov)
 
 </aside>
 
-A **permutation-based test** (also called re-randomization test) is a statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test under all possible rearrangements of the observed data points. This test is performed on $1000$ permutations of the grade over students' in-degree and computes the Pearson correlation coefficient between them.
+A **permutation-based test** (also called re-randomization test) is a statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points^[Pitman, E. J. G. (1937). Significance Tests Which May be Applied to Samples From any Populations. Supplement to the Journal of the Royal Statistical Society, 4(1), 119–130.].
+
+This test is performed on $1000$ permutations of the grade over students' in-degree while computing the Pearson correlation coefficient between them. As the histogram shows, after all the permutations, a Gaussian distribution is reached within the range of values of Pearson coefficient (i.e. $[-1,1]$), since it is likely to find no correlations between random permutations of grade and in-degree than perfect ones. Moreover, as indicated by the straight vertical line, the Pearson coefficient $\rho$ indicates that, after $1000$ permutations, the correlation is more statistically significant than by chance. 
 
 ```{r}
 set.seed(21)
@@ -780,7 +782,7 @@ The function `pnorm()` assesses that the correlation coefficient of the original
 
 </aside>
 
-Centralization is a question about how central some nodes are compared to other nodes, and it is a characteristic of the network itself. While centrality is more related to the individual sphere of the nodes, centralization regards the distribution of the centrality inside the network. ===QUI===
+Centralization is a question about how central some nodes are compared to other nodes, and it is a characteristic of the network itself. It is related to the distribution of the centrality inside the network^[Freeman, L. C. (1978). Centrality in social networks conceptual clarification. Social networks, 1(3), 215-239.], while centrality is more related to the individual sphere of the nodes^[Everett, M. G., & Borgatti, S. P. (1999). The centrality of groups and classes. The Journal of mathematical sociology, 23(3), 181-201.]. 
 
 In an undirected network, centralization is computed as follows:
 
