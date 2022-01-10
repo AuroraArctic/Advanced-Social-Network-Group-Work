@@ -1,14 +1,11 @@
 ---
 title: "Bullying Network"
-author: "Aurora Maria Tumminello, Lucia Hrovatin <br>https://auroraarctic.github.io/Advanced-Social-Network-Group-Work/ <br> https://github.com/AuroraArctic/Advanced-Social-Network-Group-Work"
+author: "Aurora Maria Tumminello, Lucia Hrovatin  <br>https://github.com/AuroraArctic/Advanced-Social-Network-Group-Work"
 output:
   html_notebook:
     toc: yes
     highlight: pygments
     theme: paper
-  html_document:
-    toc: yes
-    df_print: paged
 ---
 
 \usepackage{emoji}
