@@ -126,7 +126,7 @@ gplot(net,
       arrowhead.cex = 0.4)
 ```
 
-The *Fruchterman-Reingold* layout is the default mode of the `gplot()` function, and therefore it is not necessary to include it. Overall there are 25 labelled nodes connected through directed links representing who bullies whom. In particular, there is a student, Roberto, that does not present incoming or outgoing edges and, following the definition of Wasserman & Faust (1994), it is defined as an isolate^[Wasserman, S., & Faust, K. (1994). Social network analysis: Methods and applications]. Therefore, Roberto is the only student in this specific school class that is not bullied and does not bully either.  
+The *Fruchterman-Reingold* layout is the default mode of the `gplot()` function, and therefore it is not necessary to include it. Overall there are 25 labelled nodes connected through directed links representing who bullies whom. In particular, there is a student, Roberto, that does not present incoming or outgoing edges and, following the definition of Wasserman & Faust (1994), it is an **isolate**^[Wasserman, S., & Faust, K. (1994). Social network analysis: Methods and applications]. Therefore, Roberto is the only student in this specific school class that is not bullied and does not bully either.  
 
 
 ## Attribute-based network
@@ -147,7 +147,7 @@ Once again, let’s consider the three attributes and their respective values:
 - **Ethnicity**: categorical variable assuming three different values (1, 2 or 3);
 - **Grade**: categorical variable assuming 11 different values (from 0 to 10).
 
-These three attributes are all **categorical** data and, specifically, can be divided into **nominal** (gender and ethnicity) and **ordinal** (grade). This distinction implies a further difference in the visualisation. Whereas the nominal values can be mapped using variation in colour hue or shape, the ordinal ones may lead to different conclusions. Below two versions are displayed. The first one variates the datum size (area) and fits data based on proportional scales where the larger sizes mean greater quantities (e.g., grade 10). The second option exploits the colours' lightness. Thus, lightness variation can represent quantitative scales, where the darker the colour, the greater the quantity^[Kirk, A. (2012). Data visualisation: a successful design process. Packt publishing LTD.].
+These three attributes are all **categorical** data and, specifically, can be divided into **nominal** (gender and ethnicity) and **ordinal** (grade). This distinction implies a further difference in the visualisation. Whereas the nominal values can be mapped using variation in colour hue or shape, the ordinal ones may lead to different conclusions. Below two versions are displayed, using a combination of shape, colour and size. The first one variates the datum size (area) and fits data based on proportional scales where the larger sizes mean greater quantities (e.g., grade 10). The second option exploits the colours' lightness. Thus, lightness variation can represent quantitative scales, where the darker the colour, the greater the quantity^[Kirk, A. (2012). Data visualisation: a successful design process. Packt publishing LTD.].
 
 ### First version
 
@@ -247,13 +247,13 @@ gplot(net,
       arrowhead.cex = 0.5)
 ```
 
-Despite ethnicity losing evidence, the grade variable acquires a central role in this visualisation. Thus, the use of colour lightness to highlight the grades (i.e., higher grades with darker colours) emphasises the differences more than in the previous case where size was employed. 
+Despite ethnicity losing evidence, the grade variable acquires a central role in this visualisation. Thus, the use of colour lightness to highlight the grades (i.e. higher grades with darker colours) emphasizes the differences more than in the previous case where size was employed. 
 
-Notice that the exercise also required the use of **size**. However, applying size variation to gender or ethnicity may unconsciously suggest a social superiority of one of the categories, which does not exist. Thus, this visualisation does not consider the size to avoid any possible misunderstanding.
+Notice that the exercise also required the use of **size**. However, applying size variation to gender or ethnicity may unconsciously suggest a social superiority of one of the two categories, which does not exist. Thus, this visualisation does not consider the size to avoid any possible misunderstanding.
 
 In this case, the legend shows:
 
-- ethnicity as one of the shapes;
+- ethnicity as shapes;
 - gender as one of the two colours;
 - grade as a gradient, varying between males and females, whose lightness relies on the students’ grade.
 
@@ -313,7 +313,8 @@ gradientLegend(valRange=c(0,10),
                inside = T)
 ```
 
-### Third interactive version
+### Third interactive version {#a-interactiveVisualization}
+
 This third version exploits the package `visNetwork` to build an interactive visualisation of the network, reproducing the first version forehead proposed, where:
 
 - shapes indicate the gender (i.e. females as circles, males as squares);
@@ -363,7 +364,7 @@ visNetwork(nodes = new_net$nodes,
     visLegend(addNodes = lnodes, useGroups = FALSE, ncol = 1)
 ```
 
-The interactive version offers better exploitation and comprehension of the network through the possibility of visualising all the information related to a node by just clicking on it. Therefore, the interaction offers a further layer that solves the problem of grade definition and understanding.
+The interactive version offers better exploitation and comprehension of the network through the possibility of visualising all the information related to a node by just clicking on it. By introducing a further layer, the problem of grades definition and comparison is solved.
 
 # Centrality
 
@@ -407,7 +408,7 @@ attr$indegree = indegree
 attr$outdegree = outdegree
 ```
 
-To properly present the degrees, a dataframe has been created, with names, in-degree, out-degree and total degree (i.e. the sum of both in and out-degree). 
+To properly present the degree centrality measures, a dataframe has been created with students names, in-degree, out-degree and total degree (i.e. the sum of both in and out-degree). In addition, the normalized in-degree is computed by dividing the in-degree over the number of nodes minus $1$ (i.e. $n-1$). The last column indicates whether the single node in-degree is below (or above) the average.
 
 ```{r echo=FALSE}
 tile_colors = c("#B78FB5", # lilac
@@ -439,15 +440,15 @@ people %>%
                     'Out degree' = color_tile("transparent",tile_colors[2]),
                     'Degree' = color_tile("transparent", tile_colors[2]),
                     'Normalized In degree' = color_tile("transparent", tile_colors[1]),
-                    'Above Average' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
+                    'Above Average (In degree)' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
                                                 style = x ~ style(color = ifelse(x == "Yes", tile_colors[1], tile_colors[2])))))
 ```
 
-By considering the in-degree centrality, Sara can be defined as the most central node, followed by Gianna and Marco. As stated above, whereas having many incoming edges represents an advantageous condition for the individual in several cases, this specific network emphasizes an unfavourable status. Thus, in-degree measure refers to the number of bullies a node must face. Consequently, Sara results the chosen victim and gets bullied by nine people, which corresponds to the $0.375\%$ of the other nodes (normalization obtained by $\frac{indegree}{n-1} = \frac{9}{24} = 0.375$, with $n$ number of nodes). 
+By considering the in-degree centrality, Sara can be defined as the most central node, followed by Gianna and Marco. As stated above, whereas having many incoming edges represents an advantageous condition for the individual in several cases, this specific network emphasizes an unfavourable status. Thus, in-degree measure refers to the number of bullies a node must face. Consequently, Sara results the chosen victim and gets bullied by $9$ people, which corresponds to the $0.375\%$ of the network (normalization obtained by $\frac{in-degree}{n-1} = \frac{9}{24} = 0.375$, with $n$ number of nodes). 
 
-In the worst-case scenario, Sara would be bullied by 24 students, and she would be the only victim. However, despite her seeming far from the depicted scenario, her in-degree looks exceptionally high considering the average and the median in the degree of the entire network. The same happens for students like Gianna, Marco, Andrea, Mario and Valentina. 
+In the worst-case scenario, Sara would be bullied by $24$ students, and she would be the only victim. However, despite her seeming far from the depicted scenario, her in-degree looks exceptionally high considering the average and the median in-degree. The same happens for students like Gianna, Marco, Andrea, Mario, Valentina and Giulia. 
 
-It is also worth noticing that Sara's condition seems not to be determined by her ethnicity but by her grade. While at least one member per ethnicity has been bullied, the reason for Sara's centrality might be the achievement of the highest mark: $10$.
+It is also worth noticing that Sara's condition seems not to be determined by her ethnicity or gender, but by her grade. While at least one member per ethnicity and/or per gender has been bullied, the reason for which Sara is bullied by several students might be the achievement of the highest mark: $10$.
 
 ```{r echo=FALSE}
 results = data.frame(Measures = c("Most central node", 
@@ -472,7 +473,7 @@ formattable(results,
             align = c("l","l"))
 ```
 
-The average is strongly impacted by the unbalanced situation within the network, meaning a group of seven highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($indegree = 0$) are further analysed in the following sections and might reflect either isolate (i.e., Roberto) or bully figures. 
+As the bar plot below shows, the average is strongly impacted by the unbalanced situation within the network, meaning a group of highly bullied victims against the remaining nodes assessing low in-degree values. The extreme cases ($in-degree = 0$) are further analysed in the following sections and might reflect either isolate (i.e. Roberto) or bully figures.
 
 ```{r echo=FALSE, warning=FALSE}
 # In-degree distribution among nodes
@@ -483,7 +484,7 @@ ggplot(people)+
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Note that the following plot's nodes size indicates whether the in-degree is above the average (bigger) or not (smaller).
+Note that the following network nodes size indicates whether the in-degree is above average (bigger) or not (smaller), exploiting the interactive version proposed in section ===QUI===.
 
 ```{r echo=FALSE}
 # Setting colours, shapes, sizes, ethnicity, gender, title
@@ -531,7 +532,8 @@ visNetwork(nodes = new_net$nodes,
 </aside>
 
 
-There is no unique central node in the case of the out-degree measure. Thus, Angela, Aurora, and Francesco can be detected as the three most central nodes (as shown in the network below). It is also worth noticing that their degree measure is assessed at $9$ and, therefore, they are not the extreme cases hypothesised above (i.e., $indegree=0$). As already performed in the indegree case, some reference points are computed and reported below.
+There is no unique central node in the case of the out-degree measure. Thus, Angela, Aurora, and Francesco can be detected as the $3$ most central nodes (as shown in the table below). It is also worth noticing that their degree measure is assessed at $9$ and $8$ and, therefore, they are not the extreme cases hypothesized above (i.e., $in-degree=0$).
+As already performed in the in-degree case, some reference points are computed and reported below.
 
 ```{r echo=FALSE}
 # Normalized outdegree
@@ -555,7 +557,7 @@ people %>%
                     'Out degree' = color_tile("transparent",  tile_colors[2]),
                     'Degree' = color_tile("transparent",  tile_colors[1]),
                     'Normalized Out degree' = color_tile("transparent",  tile_colors[2]),
-                    'Above Average  (Out degree)' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
+                    'Above Average (Out degree)' = formatter("span", x ~ icontext(ifelse(x == "Yes", "ok", "remove")), 
                                                 style = x ~ style(color = ifelse(x == "Yes",  tile_colors[2],  tile_colors[1])))))
 ```
 
@@ -586,10 +588,10 @@ formattable(results,
 Each of the three central out-degree nodes bullies almost one-third of the overall network: 
 
 $$
-\left[ \frac{outdegree}{n-1} = \frac{7}{24} = 0.291 \approx 0.29 \approx 1/3\right]
+\left[ \frac{outdegree}{n-1} = \frac{7}{24} = 0.291 \approx 0.29 \approx \frac{1}{3}\right]
 $$
 
-These values are high above the average of `r avg_outdegree` $\pm$ `r round(sd(people[,"Out degree"]),3)` but do reach extreme cases, such as a centralized network (i.e., maximum out-degree). Therefore, a visual interpretation of the out-degree distribution in a bar plot graph may help understand the underlying reasons for low reference points.    
+These values are highly above the average of `r avg_outdegree` $\pm$ `r round(sd(people[,"Out degree"]),3)` but do not reach extreme cases, such as in a completely centralized network (i.e. maximum out-degree). Moreover, a visual interpretation of the out-degree distribution in a bar plot graph may help understand the underlying reasons for the low reference points.    
 
 ```{r echo=FALSE}
 ggplot(people)+
@@ -603,7 +605,9 @@ ggplot(people)+
     annotate(geom="text", x=4, y=3.5, label="Average out-degree = 3.04",color="#1FAD9D")
 ```
 
-Once again, the out-degree measure shows an imbalanced situation assessing a significant gap between the lowest extreme cases, such as 0, and the highest ones (i.e., 7). Overall, 15 nodes have an out-degree below average. The remaining 10 nodes score slightly above average or double it in the most central nodes. 
+Once again, the out-degree measure shows an imbalanced situation assessing a significant gap between the lowest extreme cases (e.g. $0$) and the highest ones (i.e.,$7$). Overall, $15$ nodes have an out-degree below average, while the remaining $10$ nodes score slightly above average or double it in the most central nodes. 
+
+Note that the following network nodes size indicates whether the out-degree is above average (bigger) or not (smaller), exploiting the interactive version proposed in section ===QUI===.
 
 ```{r echo=FALSE}
 # Setting colours, shapes, sizes, ethnicity, gender, title
@@ -651,19 +655,13 @@ cor_value = cor(indegree, grade, method = c("pearson"))
 cor_value
 ```
 
-The Pearson coefficient on in-degree and grade, namely the correlation coefficient, is slightly above `r round(cor_value,2)`. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., in-degree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
+The Pearson coefficient on in-degree and grade, namely the correlation coefficient, is slightly above `r round(cor_value,3)`. Therefore, a strong and positive linear relationship can be detected between being bullied (i.e., in-degree) and the school results. The number of bullies of a kid linearly depends on their grades. Thus, better marks correspond to a higher probability of being bullied. 
 
 ```{r}
 cor.test(indegree,grade)
 ```
 
-Moreover, the correlation test shows a low p-value, indicating a statistically significant relationship between the number of people that bully a kid and the grade he/she gets, illustrated by the following plot. In particular, it shows data points in terms of grade and in-degree and the linear relationship between these variables. 
-
-However, despite the high correlation coefficient, it is worth noticing some fallacies in the model:
-
-1. Low number of students: since our sample is composed of a small number of subjects, this model is not representative for the entire school system bullying mechanism;
-
-2. The line fits the majority of points. Nevertheless, some outliers can be detected from the plot (e.g. (3,9)).
+Moreover, the correlation test shows a low p-value, indicating a statistically significant relationship between the number of people that bully and the grade they get, illustrated by the following scatter plot. In particular, each data point is described in terms of grade (y-axis) and in-degree (x-axis). The linear relationship between these variables is reported along with its $95%$ confidence interval.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 # Linear relationship between in degree and grade
@@ -674,7 +672,12 @@ ggplot(people,aes(x = indegree, y = grade))+
     theme(axis.text.x = element_text(angle =45, hjust=1))+
     labs(title = "Linear relationship between in degree and grade")
 ```
-For confirming the relationship between grade and being bullied, the ANOVA test is applied, showing a low p-value and therefore a discriminant factor for the studied network. In particular, the pairwise test shows couples of grades where there is a substantial difference in terms of being bullied (i.e. 8 and 3 grades tend to be inside the mechanism of bullying, while 4 and 3 don't).
+However, despite the high correlation coefficient, it is worth noticing some fallacies in the model:
+
+1. Low number of students: since our sample has a small number of subjects, this model is not representative for the entire school system bullying mechanism;
+2. The line fits the majority of points. Nevertheless, some outliers can be detected from the plot (e.g. point at coordinates $p=(3,9)$).
+
+For confirming the relationship between grade and being bullied, the ANOVA test is applied, showing a low p-value and therefore a discriminant factor for the studied network. In particular, the pairwise test displays pairs of grades where there is a substantial difference in terms of being bullied. For instance, $8$ and $3$ grades tend to be inside the mechanism of bullying, while $4$ and $3$ don't.
 
 ```{r}
 res.aov <- aov(indegree ~ as.factor(Grade), data = attr)
@@ -682,7 +685,7 @@ summary(res.aov)
 TukeyHSD(res.aov)
 ```
 
-Instead, by focusing on the grade and bullying (i.e. out-degree), the resulted p-value is high and therefore the relationship is not statistically significant. 
+Instead, by focusing on the grade and bullying (i.e. out-degree), the p-value results high, leading to the conclusion that the relationship is not statistically significant. 
 
 ```{r}
 res.aov <- aov(outdegree ~ as.factor(Grade), data = attr)
@@ -691,9 +694,7 @@ summary(res.aov)
 
 ### Gender
 
-This section hosts t-tests which try to identify differences in terms of mean of two different groups, i.e. males and females. These tests were lead on in-degree and out-degree.
-
-However, no significant p-value was obtained from these tests. This means that gender is not discriminant in the bullying behaviour inside the class. 
+This section hosts t-tests which try to identify differences in terms of mean of two different groups: males and females. These tests were led on in-degree and out-degree. However, no significant p-value was obtained from these tests, meaning that gender is not discriminant in the bullying behaviour inside the class. 
 
 ```{r}
 # Mean difference between males and females (in degree)
@@ -707,7 +708,7 @@ t.test(filter(attr,Gender==0)$outdegree,
 
 ### Ethnicity
 
-For completeness, some tests are run for ethnicity too. Since there are three ethnic groups among students, ANOVA tests investigate pairwise differences. As `TukeyHSD` shows, the p-values are not significant. Therefore ethnicity is not discriminant for bullying or being bullied. 
+For completeness, some tests are run for ethnicity too. Since there are three ethnic groups among students, ANOVA tests investigate pairwise differences. As `TukeyHSD()` shows, the p-values are not significant and therefore ethnicity is not discriminant for bullying or being bullied. 
 
 ```{r}
 # Being bullied and ethnicity
@@ -728,9 +729,7 @@ TukeyHSD(res.aov)
 
 </aside>
 
-A **permutation-based test** (also called re-randomization test) is a statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test statistic under all possible rearrangements of the observed data points.
-
-This test is performed on $1000$ permutations of the grade over students' in-degree while computing the Pearson correlation coefficient between them. As the histogram shows, after all the permutations, a Gaussian distribution is reached within the range of values of Pearson coefficient (i.e. $[-1,1]$), since it is likely to find no correlations between random permutations of grade and in-degree than perfect ones. Moreover, as indicated by the straight vertical line, the Pearson coefficient $\rho$ indicates that, after $1000$ permutations, the correlation is more statistically significant than by chance. 
+A **permutation-based test** (also called re-randomization test) is a statistical significance test in which the distribution of the test under the null hypothesis is obtained by calculating all possible values of the test under all possible rearrangements of the observed data points. This test is performed on $1000$ permutations of the grade over students' in-degree and computes the Pearson correlation coefficient between them.
 
 ```{r}
 set.seed(21)
@@ -760,7 +759,13 @@ abline(v=cor(indegree, grade), lwd=2, col="#7C5079")
 text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade),
      expression(paste(rho, ": 0.85")), col = "#7C5079")
 ```
+As the histogram above shows, after all the permutations, a Gaussian distribution is reached within the range of values of Pearson coefficient (i.e. $[-1,1]$), whose mean is around $0$. This happens because it is more likely to find no correlation (i.e. $0$) between random permutations of grade and in-degree than perfect ones (i.e. $-1,1$). Moreover, as indicated by the straight vertical line at $x = 0.85$, the Pearson coefficient of the initial sample is far away from the average correlation obtained by permuting data.
 
+```{r}
+pnorm(cor_value, mean = mean(permutation), sd = sd(permutation), lower.tail = T)
+```
+
+The function `pnorm()` assesses that the correlation coefficient of the original sample is above the $99%$ of the coefficients computed by randomly permuting data. Hence, obtaining a Pearson coefficient $\rho = $`r round(cor_value,3)` would be possible in less than $1\%$ of the cases and it is therefore statistically significant. 
 
 # Centralization and reciprocity
 
@@ -775,37 +780,35 @@ text(x = cor(indegree, grade)+0.1, y = cor(indegree, grade),
 
 </aside>
 
-Centralization is a question about how central some nodes are compared to other nodes, and it is a characteristic of the network itself. It is related to the distribution of the centrality inside the network, while centrality is more related to the individual sphere of the nodes. 
+Centralization is a question about how central some nodes are compared to other nodes, and it is a characteristic of the network itself. While centrality is more related to the individual sphere of the nodes, centralization regards the distribution of the centrality inside the network. ===QUI===
 
 In an undirected network, centralization is computed as follows:
 
 $$
 Centralization = \frac{\sum (\max-degree_i)}{(n-1)(n-2)}
+$$
+The most centralized network is the one that has a single node in the centre, which links every other node in the network. In this case, the maximum degree is $(n-1)$ and the centralization index returns $1$:
 
 $$
-The most centralized network is the one that has a single node in the centre, which that links every other node in the network. In this case, the maximum degree is $(n-1)$ and the centralization index returns:
-
-$$
-C = \frac{(24-1) \cdot 24+(24-24)\cdot1}{24\cdot23} = \frac{23\cdot24}{23\cdot24} = 1
+C_{max} = \frac{(24-1) \cdot 24+(24-24)\cdot1}{24\cdot23} = \frac{23\cdot24}{23\cdot24} = 1
 $$
 
-In the opposite case, namely in a decentralized network, every node is linked to everybody else and the centralization index is:
+In the opposite case, namely in a decentralized network, every node is linked to everybody else and the centralization index is $0$:
 
 $$
-C = \frac{(24-24)\cdot25}{24\cdot23} = \frac{0}{23\cdot24} = 0
+C_{min} = \frac{(24-24)\cdot25}{24\cdot23} = \frac{0}{23\cdot24} = 0
 $$
 
 ```{r}
 # Total degree centralization
 sna::centralization(net,sna::degree)
-
 ```
 
 In the bullying network, the centralization index is `r round(sna::centralization(net,sna::degree),3)`, which indicates a reasonably decentralized network. 
 
-Since the bullying network is directed, it is possible to distinguish the centralization index into in-degree and out-degree. As the table shows, the in-degree centralization index is higher than the out-degree one, indicating a more centralized bullied network (i.e. few kids are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others).
+Since the bullying network is directed, it is possible to split the centralization index into in-degree and out-degree. As the table below shows, the in-degree centralization index is higher than the out-degree one, indicating a more centralized bullied network (i.e. few kids are bullied from many) and a less centralized bullying network (i.e. nearly everybody bullies others).
 
-Notice that both indexes are higher than the degree centralization index ($0.111$), suggesting the presence of two more centralized sub-networks. 
+Notice that both indexes are higher than the degree centralization index (i.e. `r round(sna::centralization(net,sna::degree),3)`), suggesting the presence of two more centralized sub-networks. 
 
 ```{r message=FALSE, warning=FALSE}
 table = formattable(data.frame(
@@ -819,7 +822,7 @@ names(table) = c("Centralization Index", "In degree Centralization Index", "Out 
 table
 ```
 
-Moreover, considering the two hypothetical extremes, meaning the maximum (i.e. $1$) and minimum (i.e. $0$) centralization indexes, it can be noticed that the computed ones are closer to the minimal reference point than to the maximal. Thus, the sub-networks (i.e., bullying and being bullied) are decentralized due to multiple central nodes. 
+Moreover, considering the two hypothetical extremes, meaning the maximum (i.e. $1$) and minimum (i.e. $0$) centralization indexes, it can be noticed that the computed ones are closer to the minimal reference point than to the maximal. It is worth noticing that the sub-networks (i.e. bullying and being bullied) are decentralized due to multiple central nodes. 
 
 ## Reciprocity
 
@@ -846,31 +849,31 @@ sna::dyad.census(net)
 
 Given $25$ nodes, the maximal number of edges is $(25 \cdot 24)/2 = 300$, while the minimal is $0$. In this specific network, there are:
 
-* 4 *mutual* edges: Francesco - Andrea, Flavio - Giulia, Angelo - Giulia and Marco - Sara. By looking at their degree, we can notice that:
-
-    - Flavio and Marco bully just one person per each (i.e. Giulia and Sara) respectively, but their victims, in turn, bully them, creating a cycle of attack and defense;
-    - Giulia appears twice in these mutual edges, which represent half of her in- and out-edges. This might suggest a counterattack technique: responding to the bullies by bullying them.
+* 68 *asymmetrical* edges;
+* 228 *null* or *missing* edges;
+* 4 *mutual* edges: Francesco - Andrea, Flavio - Giulia, Angelo - Giulia and Marco - Sara. 
     
 ```{r}
 # Mutual edges
 E(i_net)[which_mutual(i_net)]
 ```
 
+By looking at the table below with the nodes involved in the mutual edges, we can notice that:
 
-```{r}
+- Flavio and Marco bully just one person (i.e. Giulia and Sara respectively), but their victims, in turn, bully them, creating a cycle of attack and defense;
+- Giulia appears twice in these mutual edges, which represent half of her in and out-edges. This might suggest a counterattack technique: responding to the bullies by bullying them.
+
+```{r echo=FALSE}
 # Degree Centrality of nodes with mutual links
 people %>%
-    select(-`Above Average(Out degree)`,-`Above Average (In degree)`) %>%
+    select(-`Above Average (Out degree)`,-`Above Average (In degree)`) %>%
     filter(Name %in% c("Francesco", "Andrea", 
                        "Flavio", "Marco", 
                        "Giulia", "Sara", "Angelo")) %>%
     formattable()
 ```
-    
-* 68 *asymmetrical* edges;
-* 228 *null* or *missing* edges.
 
-As a further step, the reciprocity index is computed as the number of mutual dyads (i.e. $M$) in the network over the total amount of edges, namely the sum of mutual ($M$) and asymmetrical edges ($A$):
+As a further step, the reciprocity index is computed as the number of mutual dyads (i.e. $M$) in the network over the total amount of edges, namely the sum of mutual ($M$) and asymmetric edges ($A$):
 
 $$
 Reciprocity = \frac{2\cdot M}{2\cdot M+A}
@@ -886,30 +889,28 @@ $$
 Reciprocity = \frac{2\cdot 4}{2\cdot 4+68} = \frac{8}{76} = 0.105 \approx 11\%
 $$
 
-Therefore, the edgewise or tie or arc-based reciprocity suggests a lack of mutual edges compared to the asymmetric ones, but not their absence. This statement should also be contextualized considering some reference points, such as the minimum and maximum possible reciprocity values. The former refers to the absence of reciprocity, namely a network with only asymmetric (or null) edges, and assesses a reciprocity rate of $0.0$:
+Therefore, the **arc-based reciprocity** (also called edgewise or tie reciprocity) suggests a lack of mutual edges compared to the asymmetric ones, but not their absence. This statement should also be contextualized considering some reference points, such as the minimum and maximum possible reciprocity values. The former refers to the absence of reciprocity, namely a network with only asymmetric (or null) edges, and assesses a reciprocity rate of $0$:
 
 $$
-Reciprocity_{min} = \frac{2\cdot M}{2\cdot M+A} = \frac{2\cdot 0}{2\cdot 0+A}=0.0
+R_{min} = \frac{2\cdot M}{2\cdot M+A} = \frac{2\cdot 0}{2\cdot 0+A}=0
 $$
 
-The latter instead assumes that all edges within the network are mutual. Therefore, the highest reachable value would be $1.0$:
+The latter instead assumes that all edges within the network are mutual. Therefore, the highest reachable value would be $1$:
 
 $$
-Reciprocity_{max} = \frac{2\cdot M}{2 \cdot M+A} = \frac{2\cdot M}{2\cdot M}=1.0
+R_{max} = \frac{2\cdot M}{2 \cdot M+A} = \frac{2\cdot M}{2\cdot M}=1
 $$
-
-
-Considering the dyadic measure for reciprocity instead, the proportion of mutual and null edges over the total (i.e., mutual $M$, asymmetrical $A$ and null edges $N$), an index of `r round(sna::grecip(net, measure="dyadic"),3)` is obtained. 
+Instead, considering the dyadic measure for reciprocity, the proportion of mutual and null edges over the total, namely the sum of mutual $M$, asymmetric $A$ and null edges $N$, yields an index of `r round(sna::grecip(net, measure="dyadic"),3)`. 
 
 $$
-Reciprocity_{\text{dyadic}} = \frac{M+N}{M+N+A} 
+R_{\text{dyadic}} = \frac{M+N}{M+N+A} 
 $$
 
 ```{r}
 sna::grecip(net, measure="dyadic")
 ```
 
-Thanks to a different interpretation of the dyads, the obtained reciprocity value is considerably higher than before. Thus, the initial assumption relies on the definition of *null* edge as asymmetric *non-relation*, implying an absence of bullying acts from both sides. Thanks to a different interpretation of the dyads, the obtained reciprocity value is considerably higher than before. Thus, the initial assumption relies on the definition of *null* edge as asymmetric *non-relation*, implying an absence of bullying acts from both sides. The census results make it possible to understand the high reciprocity rate as the null edges were the majority (i.e., $228$ over $300$). 
+Thanks to a different interpretation of the dyads, the obtained reciprocity value is considerably higher than before. Thus, the initial assumption relies on the definition of *null* edge as a symmetric *non-relation*, implying an absence of bullying acts from both sides. The census results highlight how the null edges represent the major type of edges (i.e., $228$ over $300$), making possible to understand the high reciprocity rate.
 
 A clear demonstration of null edges' strong influence can be driven by computing the ratio of mutuals to non-null dyads. 
 
@@ -917,10 +918,8 @@ $$
 Reciprocity_{\text{dyadic non null}} = \frac{M}{M+A} 
 $$
 
-The index falls to `r round(sna::grecip(net, measure="dyadic.nonnull"),3)` and indicates that over the $5\%$ of the non-null dyads is mutual and therefore that over $5\%$ of students bully each other mutually. 
+The index falls to `r round(sna::grecip(net, measure="dyadic.nonnull"),3)` and indicates that over the $5\%$ of the non-null dyads is mutual.
 
 ```{r}
 sna::grecip(net, measure="dyadic.nonnull")
 ```
-
-Note that the dyadic reciprocity is distinct from the *edgewise* or *tie reciprocity*, which is the proportion of reciprocated edges and has been expressed by setting `sna::grecip(net, measure="edgewise")`. 
