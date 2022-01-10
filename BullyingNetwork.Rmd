@@ -1,17 +1,17 @@
 ---
 title: "Bullying Network"
-author: "Aurora Maria Tumminello, Lucia Hrovatin"
+author: "Aurora Maria Tumminello, Lucia Hrovatin <br>https://auroraarctic.github.io/Advanced-Social-Network-Group-Work/ <br> https://github.com/AuroraArctic/Advanced-Social-Network-Group-Work"
 output:
-  html_document:
-    toc: yes
-    df_print: paged
-  pdf_document:
-    toc: yes
   html_notebook:
     toc: yes
     highlight: pygments
     theme: paper
+  html_document:
+    toc: yes
+    df_print: paged
 ---
+
+\usepackage{emoji}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi=400,fig.width=7)
@@ -313,9 +313,9 @@ gradientLegend(valRange=c(0,10),
                inside = T)
 ```
 
-### Third interactive version {#a-interactiveVisualization}
+### Third interactive version
 
-This third version exploits the package `visNetwork` to build an interactive visualisation of the network, reproducing the first version forehead proposed, where:
+This third version exploits the package `visNetwork` to build an interactive visualization of the network, reproducing the first version forehead proposed, where:
 
 - shapes indicate the gender (i.e. females as circles, males as squares);
 - colour hue indicates the ethnicity, as shown in the legend;
@@ -484,7 +484,7 @@ ggplot(people)+
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
-Note that the following network nodes size indicates whether the in-degree is above average (bigger) or not (smaller), exploiting the interactive version proposed in section ===QUI===.
+Note that the following network nodes size indicates whether the in-degree is above average (bigger) or not (smaller), exploiting the interactive version proposed in section [Third interactive version].
 
 ```{r echo=FALSE}
 # Setting colours, shapes, sizes, ethnicity, gender, title
@@ -607,7 +607,7 @@ ggplot(people)+
 
 Once again, the out-degree measure shows an imbalanced situation assessing a significant gap between the lowest extreme cases (e.g. $0$) and the highest ones (i.e.,$7$). Overall, $15$ nodes have an out-degree below average, while the remaining $10$ nodes score slightly above average or double it in the most central nodes. 
 
-Note that the following network nodes size indicates whether the out-degree is above average (bigger) or not (smaller), exploiting the interactive version proposed in section ===QUI===.
+Note that the following network nodes size indicates whether the out-degree is above average (bigger) or not (smaller), exploiting the interactive version proposed in section [Third interactive version].
 
 ```{r echo=FALSE}
 # Setting colours, shapes, sizes, ethnicity, gender, title
@@ -917,7 +917,7 @@ Thanks to a different interpretation of the dyads, the obtained reciprocity valu
 A clear demonstration of null edges' strong influence can be driven by computing the ratio of mutuals to non-null dyads. 
 
 $$
-Reciprocity_{\text{dyadic non null}} = \frac{M}{M+A} 
+R_{\text{dyadic non null}} = \frac{M}{M+A} 
 $$
 
 The index falls to `r round(sna::grecip(net, measure="dyadic.nonnull"),3)` and indicates that over the $5\%$ of the non-null dyads is mutual.
