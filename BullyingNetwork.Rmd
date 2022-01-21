@@ -2,7 +2,7 @@
 title: "Bullying Network"
 author: "Aurora Maria Tumminello, Lucia Hrovatin  <br>https://github.com/AuroraArctic/Advanced-Social-Network-Group-Work"
 output:
-  html_notebook:
+  html_document:
     toc: yes
     highlight: pygments
     theme: paper
